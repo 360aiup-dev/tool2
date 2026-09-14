@@ -15,55 +15,43 @@ export const TeamSection: React.FC = () => {
                 <Users className="w-24 h-24 text-slate-400 group-hover:text-amber-400 transition-colors" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">資深勞資顧問團隊</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">資深勞資顧問</h3>
               <p className="text-amber-400 text-lg font-bold">您的企業戰略夥伴</p>
-              <p className="text-slate-400 text-xs mt-2">主持顧問：許顧問與法務人資智囊群</p>
+              <p className="text-slate-400 text-xs mt-2">許顧問與法務人資專業智囊團隊</p>
             </div>
 
             <div className="w-full lg:w-2/3 text-center lg:text-left">
               <div className="inline-flex items-center space-x-2 bg-slate-800/80 border border-slate-700 px-3.5 py-1.5 rounded-full mb-4 text-xs text-amber-400 font-semibold">
                 <Award className="w-3.5 h-3.5 mr-1" />
-                20+ 年全方位顧問實務經驗
+                20+ 年企業勞資顧問實務經驗
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">
-                為什麼選擇我們？
+                為什麼選擇我？
               </h2>
               <p className="text-slate-300 mb-8 text-lg sm:text-xl leading-relaxed font-light">
-                我們整合法律、財務與人力資源專家，不只是懂法條，更懂經營生意。團隊協助您建立
-                <span className="text-amber-400 font-medium">「老闆睡得著覺、員工願意共同拚搏」</span>
-                的長治久安制度。
+                我不只懂法條，我更懂生意。我不教您鑽法律漏洞，而是教您建立一套讓
+                <span className="text-amber-400 font-medium">老闆睡得著覺、員工願意拚命</span>
+                的管理制度。
               </p>
 
-              {/* 3 Value Pillars */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800">
-                <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 text-left">
-                  <div className="text-amber-400 mb-2">
-                    <Scale className="w-5 h-5" />
-                  </div>
-                  <div className="text-white font-bold text-sm mb-1">法律合規為盾</div>
-                  <div className="text-slate-400 text-xs leading-relaxed">
-                    全盤遵循勞動三法與職災專法，杜絕勞檢高額罰單。
-                  </div>
+              {/* 3 Metrics / Value Pillars from Google site */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-center">
+                <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
+                  <div className="text-3xl font-black text-amber-400 mb-1">100+</div>
+                  <div className="text-sm font-bold text-white mb-1">經手爭議案例</div>
+                  <div className="text-slate-400 text-xs">累積豐富實戰化解經驗</div>
                 </div>
 
-                <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 text-left">
-                  <div className="text-amber-400 mb-2">
-                    <Compass className="w-5 h-5" />
-                  </div>
-                  <div className="text-white font-bold text-sm mb-1">薪酬激勵為矛</div>
-                  <div className="text-slate-400 text-xs leading-relaxed">
-                    精準拆分薪資結構，將獲利與員工績效緊密鏈結。
-                  </div>
+                <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
+                  <div className="text-3xl font-black text-amber-400 mb-1">千萬</div>
+                  <div className="text-sm font-bold text-white mb-1">節省潛在成本</div>
+                  <div className="text-slate-400 text-xs">避免高額罰單與補償損失</div>
                 </div>
 
-                <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 text-left">
-                  <div className="text-amber-400 mb-2">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div className="text-white font-bold text-sm mb-1">一對一實地輔導</div>
-                  <div className="text-slate-400 text-xs leading-relaxed">
-                    由許顧問親自領軍訪談，為您的企業量身客製落地方案。
-                  </div>
+                <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
+                  <div className="text-3xl font-black text-amber-400 mb-1">專精</div>
+                  <div className="text-sm font-bold text-white mb-1">製造 / 服務 / 長照</div>
+                  <div className="text-slate-400 text-xs">量身客製各產業落地方案</div>
                 </div>
               </div>
             </div>

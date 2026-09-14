@@ -9,7 +9,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
         <a href="#" className="flex items-center text-white group">
           <ShieldCheck className="h-8 w-8 text-amber-500 mr-2 group-hover:scale-105 transition-transform" />
-          <span className="text-xl font-bold tracking-wide">勞資戰略顧問團隊</span>
+          <span className="text-xl font-bold tracking-wide">勞資戰略顧問</span>
         </a>
 
         {/* Desktop Links */}

@@ -1,0 +1,776 @@
+<!doctype html>
+<html>
+<head>
+<script nonce="ocyXoZ5_si4Kq4EVcDmohA">window['ppConfig'] = {productName: '26981ed0d57bbad37e728ff58134270c', deleteIsEnforced:  false , sealIsEnforced:  false , heartbeatRate:  0.5 , periodicReportingRateMillis:  60000.0 , disableAllReporting:  false };(function(){'use strict';function k(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}function l(a){var b=typeof Symbol!="undefined"&&Symbol.iterator&&a[Symbol.iterator];if(b)return b.call(a);if(typeof a.length=="number")return{next:k(a)};throw Error(String(a)+" is not an iterable or ArrayLike");}var m=typeof Object.defineProperties=="function"?Object.defineProperty:function(a,b,c){if(a==Array.prototype||a==Object.prototype)return a;a[b]=c.value;return a};
+function n(a){a=["object"==typeof globalThis&&globalThis,a,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var b=0;b<a.length;++b){var c=a[b];if(c&&c.Math==Math)return c}throw Error("Cannot find global object");}var p=n(this);function q(a,b){if(b)a:{var c=p;a=a.split(".");for(var d=0;d<a.length-1;d++){var e=a[d];if(!(e in c))break a;c=c[e]}a=a[a.length-1];d=c[a];b=b(d);b!=d&&b!=null&&m(c,a,{configurable:!0,writable:!0,value:b})}}
+q("Object.is",function(a){return a?a:function(b,c){return b===c?b!==0||1/b===1/c:b!==b&&c!==c}});q("Array.prototype.includes",function(a){return a?a:function(b,c){var d=this;d instanceof String&&(d=String(d));var e=d.length;c=c||0;for(c<0&&(c=Math.max(c+e,0));c<e;c++){var f=d[c];if(f===b||Object.is(f,b))return!0}return!1}});
+q("String.prototype.includes",function(a){return a?a:function(b,c){if(this==null)throw new TypeError("The 'this' value for String.prototype.includes must not be null or undefined");if(b instanceof RegExp)throw new TypeError("First argument to String.prototype.includes must not be a regular expression");return this.indexOf(b,c||0)!==-1}});function r(a,b,c){a("https://csp.withgoogle.com/csp/proto/"+encodeURIComponent(b),JSON.stringify(c))}function t(){var a;if((a=window.ppConfig)==null?0:a.disableAllReporting)return function(){};var b,c,d,e;return(e=(b=window)==null?void 0:(c=b.navigator)==null?void 0:(d=c.sendBeacon)==null?void 0:d.bind(navigator))!=null?e:u}function u(a,b){var c=new XMLHttpRequest;c.open("POST",a);c.send(b)}
+function v(){var a=(w=Object.prototype)==null?void 0:w.__lookupGetter__("__proto__"),b=x,c=y;return function(){var d=a.call(this),e,f,g,h;r(c,b,{type:"ACCESS_GET",origin:(f=window.location.origin)!=null?f:"unknown",report:{className:(g=d==null?void 0:(e=d.constructor)==null?void 0:e.name)!=null?g:"unknown",stackTrace:(h=Error().stack)!=null?h:"unknown"}});return d}}
+function z(){var a=(A=Object.prototype)==null?void 0:A.__lookupSetter__("__proto__"),b=x,c=y;return function(d){d=a.call(this,d);var e,f,g,h;r(c,b,{type:"ACCESS_SET",origin:(f=window.location.origin)!=null?f:"unknown",report:{className:(g=d==null?void 0:(e=d.constructor)==null?void 0:e.name)!=null?g:"unknown",stackTrace:(h=Error().stack)!=null?h:"unknown"}});return d}}function B(a,b){C(a.productName,b);setInterval(function(){C(a.productName,b)},a.periodicReportingRateMillis)}
+var D="constructor __defineGetter__ __defineSetter__ hasOwnProperty __lookupGetter__ __lookupSetter__ isPrototypeOf propertyIsEnumerable toString valueOf __proto__ toLocaleString x_ngfn_x".split(" "),E=D.concat,G=navigator.userAgent.match(/Firefox/([0-9]+)\./),H=(!G||G.length<2?0:Number(G[1])<75)?["toSource"]:[],I;if(H instanceof Array)I=H;else{for(var J=l(H),K,L=[];!(K=J.next()).done;)L.push(K.value);I=L}var M=E.call(D,I),N=[];
+function C(a,b){var c=[],d=l(Object.getOwnPropertyNames(Object.prototype)),e=d.next(),f;try{for(;!e.done;e=d.next()){var g=e.value;M.includes(g)||N.includes(g)||c.push(g)}}finally{e&&!e.done&&(f=d.return)&&f.call(d)}e=Object.prototype;d=[];for(f=0;f<c.length;f++)g=c[f],d[f]={name:g,descriptor:Object.getOwnPropertyDescriptor(Object.prototype,g),type:typeof e[g]};if(d.length!==0){c=l(d);e=c.next();var h;try{for(;!e.done;e=c.next())N.push(e.value.name)}finally{e&&!e.done&&(h=c.return)&&h.call(c)}var F;
+r(b,a,{type:"SEAL",origin:(F=window.location.origin)!=null?F:"unknown",report:{blockers:d}})}};var O=Math.random(),P=t(),Q=window.ppConfig;Q&&(Q.disableAllReporting||Q.deleteIsEnforced&&Q.sealIsEnforced||O<Q.heartbeatRate&&r(P,Q.productName,{origin:window.location.origin,type:"HEARTBEAT"}));var y=t(),R=window.ppConfig;if(R)if(R.deleteIsEnforced)delete Object.prototype.__proto__;else if(!R.disableAllReporting){var x=R.productName;try{var w,A;Object.defineProperty(Object.prototype,"__proto__",{enumerable:!1,get:v(),set:z()})}catch(a){}}
+(function(){var a=t(),b=window.ppConfig;b&&(b.sealIsEnforced?Object.seal(Object.prototype):b.disableAllReporting||(document.readyState!=="loading"?B(b,a):document.addEventListener("DOMContentLoaded",function(){B(b,a)})))})();}).call(this);
+</script><meta name="chromevox" content-script="no">
+<title>2026 企業勞資戰略佈局 | 資深勞資顧問</title>
+<meta name="viewport"content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" nonce="rp005Ux7KAMwrW4PxCRfTw"><link rel="stylesheet" href="/static/macros/client/css/2208734863-mae_html_css_ltr.css">
+<script type="text/javascript" src="/static/macros/client/js/3061253642-warden_bin_i18n_warden__zh_tw.js"></script>
+</head>
+<body>
+<table id="warning-bar-table" class="full_size" cellspacing="0" cellpadding="0"><tr><td><div id="warning" class="warning-bar"></div></td></tr><tr><td style="height: 100%"><iframe id="sandboxFrame" title="2026 企業勞資戰略佈局 | 資深勞資顧問" allow="accelerometer *; autoplay *; camera *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; microphone *; midi *; payment *; picture-in-picture *; screen-wake-lock *; sync-xhr *; usb *; web-share *" sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-storage-access-by-user-activation">
+</iframe>
+</td></tr></table><script nonce="ocyXoZ5_si4Kq4EVcDmohA">
+(function() {
+var el = document.getElementById('sandboxFrame');
+el.onload = function() {
+goog.script.init("{"functionNames":["doGet","callGeminiServerSide","checkDailyLimit","saveContactToSheet"],"sandboxMode":"IFRAME_SANDBOX","callbackTimeout":390000,"deploymentId":"AKfycby1Oqvt67Y1eYOAa4Z0odRkU0CnaOC9oXVvLFftP34Fl6lFzU2py8KJ1QcxhhL5Awn-","eei":"","sandboxHost":"https://n-gwec5bgorpgbblbtcftwtzcflojy27k2quxsl2i-0lu-script.googleusercontent.com","clientSideProperties":{"google.script.sandbox.mode":"IFRAME_SANDBOX","google.script.use_fetch_for_post_form":true,"google.script.host.origin":"https://docs.google.com"},"actionPrefix":"/macros/s/AKfycby1Oqvt67Y1eYOAa4Z0odRkU0CnaOC9oXVvLFftP34Fl6lFzU2py8KJ1QcxhhL5Awn-","userHtml":"<!DOCTYPE html>\
+<html lang=\"zh-TW\">\
+<head>\
+    <meta charset=\"UTF-8\">\
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\
+    <title>2026 企業勞資戰略佈局 | 資深勞資顧問<\\/title>\
+    <script src=\"https://cdn.tailwindcss.com\"><\\/script>\
+    <script src=\"https://unpkg.com/lucide@latest\"><\\/script>\
+    \
+    <script src=\"https://cdn.jsdelivr.net/npm/marked/marked.min.js\"><\\/script>\
+    <link href=\"https://fonts.googleapis.com/css2?family=Noto&#43;Sans&#43;TC:wght@300;400;500;700;900&amp;display=swap\" rel=\"stylesheet\">\
+    <style>\
+        body {\
+            font-family: 'Noto Sans TC', sans-serif;\
+            scroll-behavior: smooth;\
+             \
+            user-select: none;\
+            -webkit-user-select: none;\
+        }\
+         \
+        input, textarea, select {\
+            user-select: text;\
+            -webkit-user-select: text;\
+        }\
+        \
+        .text-gold {\
+            color: #F59E0B;\
+        }\
+        .bg-gold {\
+            background-color: #F59E0B;\
+        }\
+        .border-gold {\
+            border-color: #F59E0B;\
+        }\
+        .gradient-bg {\
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);\
+        }\
+         \
+        .typing-indicator span {\
+            animation: blink 1.4s infinite both;\
+            height: 8px;\
+            width: 8px;\
+            background-color: #F59E0B;\
+            border-radius: 50%;\
+            display: inline-block;\
+            margin: 0 2px;\
+        }\
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }\
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }\
+        @keyframes blink {\
+            0% { opacity: 0.2; }\
+            20% { opacity: 1; }\
+            100% { opacity: 0.2; }\
+        }\
+        \
+         \
+        #ai-result {\
+            color: #e2e8f0 !important;\
+            line-height: 1.7;\
+            font-size: 0.95rem;\
+             \
+            user-select: text;\
+            -webkit-user-select: text;\
+        }\
+        #ai-result * { color: inherit; }\
+        #ai-result h1, #ai-result h2, #ai-result h3 {\
+            color: #ffffff !important;\
+            font-weight: 700;\
+            margin-top: 1.5em;\
+            margin-bottom: 0.5em;\
+            font-size: 1.1rem;\
+        }\
+        #ai-result strong {\
+            color: #fbbf24 !important;\
+            font-weight: 700;\
+        }\
+        #ai-result ul, #ai-result ol {\
+            list-style-type: disc;\
+            padding-left: 1.5em;\
+            margin-bottom: 1em;\
+            color: #cbd5e1 !important;\
+        }\
+        #ai-result ol { list-style-type: decimal; }\
+        #ai-result li { margin-bottom: 0.4em; color: #e2e8f0 !important; }\
+        #ai-result p { margin-bottom: 1em; color: #e2e8f0 !important; }\
+        #ai-result blockquote {\
+            border-left: 4px solid #F59E0B;\
+            padding-left: 1em;\
+            color: #94a3b8 !important;\
+            font-style: italic;\
+            margin: 1em 0;\
+            background: rgba(255,255,255,0.05);\
+            padding: 0.5em 1em;\
+            border-radius: 0 4px 4px 0;\
+        }\
+        \
+         \
+        .fade-in {\
+            animation: fadeIn 0.5s ease-in-out;\
+        }\
+        @keyframes fadeIn {\
+            from { opacity: 0; transform: translateY(10px); }\
+            to { opacity: 1; transform: translateY(0); }\
+        }\
+\
+         \
+        .modal {\
+            transition: opacity 0.3s ease-in-out;\
+            opacity: 0;\
+            pointer-events: none;\
+        }\
+        .modal.active {\
+            opacity: 1;\
+            pointer-events: auto;\
+        }\
+    <\\/style>\
+<\\/head>\
+<body class=\"bg-slate-50 text-slate-800 antialiased\">\
+\
+    \
+    <nav class=\"fixed w-full z-50 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700\">\
+        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\
+            <div class=\"flex justify-between items-center h-20\">\
+                <div class=\"flex items-center\">\
+                    <i data-lucide=\"shield-check\" class=\"h-8 w-8 text-gold mr-2\"><\\/i>\
+                    <span class=\"text-white text-xl font-bold tracking-wide\">勞資戰略顧問<\\/span>\
+                <\\/div>\
+                <div class=\"hidden md:flex space-x-8\">\
+                    <a href=\"#ai-tool\" class=\"text-gold hover:text-white transition text-sm font-medium flex items-center\"><i data-lucide=\"sparkles\" class=\"w-4 h-4 mr-1\"><\\/i>AI 快篩<\\/a>\
+                    <a href=\"#talent\" class=\"text-slate-300 hover:text-gold transition text-sm font-medium\">人才留任<\\/a>\
+                    <a href=\"#risk\" class=\"text-slate-300 hover:text-gold transition text-sm font-medium\">風險防禦<\\/a>\
+                    <a href=\"#management\" class=\"text-slate-300 hover:text-gold transition text-sm font-medium\">管理升級<\\/a>\
+                <\\/div>\
+                <div>\
+                    <a href=\"#contact\" class=\"bg-gold hover:bg-amber-600 text-slate-900 font-bold py-2 px-6 rounded shadow-lg transition duration-300 transform hover:scale-105\">\
+                        預約診斷\
+                    <\\/a>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/nav>\
+\
+    \
+    <header class=\"relative pt-32 pb-20 lg:pt-48 lg:pb-32 gradient-bg overflow-hidden\">\
+        <div class=\"absolute inset-0 opacity-20\">\
+            <img src=\"https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&amp;fit=crop&amp;q=80&amp;w=2000\" alt=\"Office Background\" class=\"w-full h-full object-cover\">\
+        <\\/div>\
+        <div class=\"relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center\">\
+            <div class=\"w-full md:w-3/5 text-center md:text-left mb-12 md:mb-0\">\
+                <div class=\"inline-block px-4 py-1 mb-6 rounded-full border border-gold/50 bg-slate-800/50 backdrop-blur\">\
+                    <span class=\"text-gold text-sm font-bold tracking-wider uppercase\">您的勞資戰略顧問<\\/span>\
+                <\\/div>\
+                <h1 class=\"text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6\">\
+                    別讓<span class=\"text-gold\">勞資爭議<\\/span><br>\
+                    吃掉您的淨利\
+                <\\/h1>\
+                <p class=\"text-lg md:text-xl text-slate-300 mb-8 max-w-2xl leading-relaxed\">\
+                    從大缺工到工資調漲，只有合法的「薪酬佈局」與「風險控管」，才能將人事成本轉化為企業競爭力。\
+                <\\/p>\
+                <div class=\"flex flex-col sm:flex-row gap-4 justify-center md:justify-start\">\
+                    <a href=\"#ai-tool\" class=\"flex items-center justify-center bg-white hover:bg-slate-100 text-slate-900 font-bold py-4 px-8 rounded shadow-lg transition duration-300 border border-slate-200\">\
+                        <i data-lucide=\"sparkles\" class=\"mr-2 h-5 w-5 text-gold\"><\\/i>\
+                        體驗 AI 風險快篩\
+                    <\\/a>\
+                    <a href=\"#contact\" class=\"flex items-center justify-center bg-gold hover:bg-amber-600 text-slate-900 font-bold py-4 px-8 rounded shadow-lg transition duration-300\">\
+                        立即預約 30 分鐘風險診斷\
+                        <i data-lucide=\"arrow-right\" class=\"ml-2 h-5 w-5\"><\\/i>\
+                    <\\/a>\
+                <\\/div>\
+            <\\/div>\
+            <div class=\"w-full md:w-2/5 relative hidden md:block\">\
+                <div class=\"absolute -inset-4 bg-gold/20 rounded-lg blur-lg\"><\\/div>\
+                <img src=\"https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&amp;fit=crop&amp;q=80&amp;w=800\" alt=\"Strategy Meeting\" class=\"relative rounded-lg shadow-2xl border-2 border-slate-700 transform rotate-2 hover:rotate-0 transition duration-500\">\
+            <\\/div>\
+        <\\/div>\
+    <\\/header>\
+\
+    \
+    <section id=\"ai-tool\" class=\"py-20 bg-slate-900 relative overflow-hidden border-b border-slate-800\">\
+        <div class=\"absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10\">\
+            <div class=\"absolute w-96 h-96 bg-blue-500 rounded-full blur-3xl -top-20 -left-20\"><\\/div>\
+            <div class=\"absolute w-96 h-96 bg-purple-500 rounded-full blur-3xl bottom-0 right-0\"><\\/div>\
+        <\\/div>\
+\
+        <div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10\">\
+            <div class=\"text-center mb-10\">\
+                <span class=\"inline-flex items-center px-3 py-1 rounded-full border border-purple-500 bg-purple-900/30 text-purple-300 text-sm font-medium mb-4\">\
+                    <i data-lucide=\"sparkles\" class=\"w-4 h-4 mr-2\"><\\/i> Gemini AI 驅動\
+                <\\/span>\
+                <h2 class=\"text-3xl md:text-4xl font-bold text-white mb-4\">AI 企業勞資風險快篩<\\/h2>\
+                <p class=\"text-slate-300 max-w-2xl mx-auto\">\
+                    輸入您的公司現況，讓 AI 顧問模擬分析潛在的勞資地雷。\
+                <\\/p>\
+            <\\/div>\
+\
+            <div class=\"bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col md:flex-row min-h-[500px]\">\
+                \
+                <div class=\"w-full md:w-5/12 p-8 border-b md:border-b-0 md:border-r border-slate-700 flex flex-col justify-center\">\
+                    <form id=\"ai-form\" class=\"space-y-6\">\
+                        <div>\
+                            <label class=\"block text-slate-300 text-sm font-bold mb-2\">所屬行業<\\/label>\
+                            <select id=\"industry\" class=\"w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold transition\">\
+                                <option value=\"製造業\">製造業<\\/option>\
+                                <option value=\"餐飲服務業\">餐飲服務業<\\/option>\
+                                <option value=\"零售業\">零售業<\\/option>\
+                                <option value=\"科技/軟體業\">科技/軟體業<\\/option>\
+                                <option value=\"長照醫療\">長照醫療<\\/option>\
+                                <option value=\"營造工程\">營造工程<\\/option>\
+                                <option value=\"其他\">其他<\\/option>\
+                            <\\/select>\
+                        <\\/div>\
+                        <div>\
+                            <label class=\"block text-slate-300 text-sm font-bold mb-2\">公司規模<\\/label>\
+                            <select id=\"size\" class=\"w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold transition\">\
+                                <option value=\"5人以下\">5人以下<\\/option>\
+                                <option value=\"5-30人\">5-30人<\\/option>\
+                                <option value=\"31-100人\">31-100人<\\/option>\
+                                <option value=\"100人以上\">100人以上<\\/option>\
+                            <\\/select>\
+                        <\\/div>\
+                        <div>\
+                            <label class=\"block text-slate-300 text-sm font-bold mb-2\">管理痛點 / 疑問<\\/label>\
+                            <textarea id=\"issue\" rows=\"3\" class=\"w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold transition\" placeholder=\"例如：員工常遲到爭議、責任制加班費、想資遣不適任員工...\"><\\/textarea>\
+                        <\\/div>\
+                        <button type=\"submit\" id=\"analyze-btn\" class=\"w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-6 rounded-lg shadow-lg transform hover:scale-[1.02] transition duration-200 flex items-center justify-center\">\
+                            <i data-lucide=\"zap\" class=\"w-5 h-5 mr-2\"><\\/i>\
+                            開始 AI 診斷\
+                        <\\/button>\
+                    <\\/form>\
+                <\\/div>\
+\
+                \
+                <div class=\"w-full md:w-7/12 p-8 bg-slate-900 flex flex-col relative\">\
+                    <div id=\"result-placeholder\" class=\"flex flex-col items-center justify-center h-full text-center text-slate-500\">\
+                        <i data-lucide=\"bot\" class=\"w-16 h-16 mb-4 opacity-50\"><\\/i>\
+                        <p>請在左側填寫資料<br>AI 顧問將為您產生初步分析<\\/p>\
+                    <\\/div>\
+                    \
+                    <div id=\"loading-state\" class=\"hidden flex flex-col items-center justify-center h-full\">\
+                        <div class=\"typing-indicator mb-4\">\
+                            <span><\\/span><span><\\/span><span><\\/span>\
+                        <\\/div>\
+                        <p class=\"text-gold text-sm animate-pulse\">AI 顧問正在分析法規與風險...<\\/p>\
+                    <\\/div>\
+\
+                    \
+                    <div id=\"ai-result-header\" class=\"hidden flex justify-between items-center mb-4 border-b border-slate-700 pb-2\">\
+                        <h3 class=\"text-white font-bold text-lg\">分析結果<\\/h3>\
+                        <button onclick=\"printReport()\" class=\"flex items-center text-sm bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded transition shadow border border-slate-600 hover:border-gold\">\
+                            <i data-lucide=\"printer\" class=\"w-4 h-4 mr-2\"><\\/i> 列印 / 匯出 PDF\
+                        <\\/button>\
+                    <\\/div>\
+\
+                    <div id=\"ai-result\" class=\"hidden h-full overflow-y-auto pr-2 custom-scrollbar fade-in\">\
+                        \
+                    <\\/div>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/section>\
+\
+    \
+    <section id=\"talent\" class=\"py-20 bg-white\">\
+        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\
+            <div class=\"flex flex-col lg:flex-row items-center gap-16\">\
+                <div class=\"w-full lg:w-1/2\">\
+                    <img src=\"https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&amp;fit=crop&amp;q=80&amp;w=1000\" alt=\"Money and Salary Concept\" class=\"w-full h-auto object-cover rounded-xl shadow-xl border border-slate-200\">\
+                <\\/div>\
+                <div class=\"w-full lg:w-1/2\">\
+                    <div class=\"flex items-center mb-4\">\
+                        <span class=\"bg-slate-100 text-slate-600 px-3 py-1 rounded text-sm font-semibold mr-3\">主題一：人才留任<\\/span>\
+                        <div class=\"h-px bg-slate-300 flex-grow\"><\\/div>\
+                    <\\/div>\
+                    <h2 class=\"text-3xl font-bold text-slate-900 mb-6\">加薪也留不住人？<br>因為您缺乏「激勵型」薪資結構<\\/h2>\
+                    <p class=\"text-slate-600 mb-6 leading-relaxed\">\
+                        面對大缺工與基本工資調漲，盲目加底薪只會壓縮獲利。年輕世代看重的是公平性與未來性。\
+                    <\\/p>\
+                    \
+                    <div class=\"bg-slate-50 p-6 rounded-lg border-l-4 border-gold mb-8\">\
+                        <h3 class=\"font-bold text-slate-800 mb-4 flex items-center\">\
+                            <i data-lucide=\"lightbulb\" class=\"text-gold mr-2\"><\\/i> 顧問解決方案\
+                        <\\/h3>\
+                        <ul class=\"space-y-3\">\
+                            <li class=\"flex items-start\">\
+                                <i data-lucide=\"check-circle-2\" class=\"text-green-600 w-5 h-5 mr-3 mt-1 flex-shrink-0\"><\\/i>\
+                                <span class=\"text-slate-700\"><strong class=\"text-slate-900\">薪資結構重組：<\\/strong>拆解保障薪與績效獎金，合法優化勞健保成本。<\\/span>\
+                            <\\/li>\
+                            <li class=\"flex items-start\">\
+                                <i data-lucide=\"check-circle-2\" class=\"text-green-600 w-5 h-5 mr-3 mt-1 flex-shrink-0\"><\\/i>\
+                                <span class=\"text-slate-700\"><strong class=\"text-slate-900\">留才金手銬：<\\/strong>設計核心幹部股權與保單計畫，變員工為夥伴。<\\/span>\
+                            <\\/li>\
+                        <\\/ul>\
+                    <\\/div>\
+                    <p class=\"text-slate-500 italic font-medium border-l-2 border-slate-300 pl-4\">\
+                        \"別讓無效的加薪，變成養懶人的溫床。\"\
+                    <\\/p>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/section>\
+\
+    \
+    <section id=\"risk\" class=\"py-20 bg-slate-900 text-white\">\
+        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\
+            <div class=\"flex flex-col lg:flex-row-reverse items-center gap-16\">\
+                <div class=\"w-full lg:w-1/2\">\
+                    <div class=\"relative\">\
+                        <div class=\"absolute -top-4 -right-4 w-24 h-24 bg-gold rounded-full opacity-20 blur-xl\"><\\/div>\
+                        <img src=\"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&amp;fit=crop&amp;q=80&amp;w=1000\" alt=\"Risk Defense Analysis\" class=\"w-full h-auto object-cover rounded-xl shadow-2xl border border-slate-700 relative z-10 grayscale hover:grayscale-0 transition duration-500\">\
+                    <\\/div>\
+                <\\/div>\
+                <div class=\"w-full lg:w-1/2\">\
+                    <div class=\"flex items-center mb-4\">\
+                        <span class=\"bg-slate-800 text-gold px-3 py-1 rounded text-sm font-semibold mr-3 border border-slate-700\">主題二：風險防禦<\\/span>\
+                        <div class=\"h-px bg-slate-700 flex-grow\"><\\/div>\
+                    <\\/div>\
+                    <h2 class=\"text-3xl font-bold text-white mb-6\">勞檢與訴訟不是機率問題<br>而是「時間」問題<\\/h2>\
+                    <p class=\"text-slate-400 mb-6 leading-relaxed\">\
+                        職災法規加嚴，勞權意識抬頭。只要一名員工離職後檢舉，一張罰單可能就是幾萬起跳，更別提補發加班費的百萬鉅款。\
+                    <\\/p>\
+                    \
+                    <div class=\"bg-slate-800/50 p-6 rounded-lg border-l-4 border-gold mb-8 backdrop-blur\">\
+                        <h3 class=\"font-bold text-white mb-4 flex items-center\">\
+                            <i data-lucide=\"shield-alert\" class=\"text-gold mr-2\"><\\/i> 顧問解決方案\
+                        <\\/h3>\
+                        <ul class=\"space-y-3\">\
+                            <li class=\"flex items-start\">\
+                                <i data-lucide=\"check\" class=\"text-gold w-5 h-5 mr-3 mt-1 flex-shrink-0\"><\\/i>\
+                                <span class=\"text-slate-300\"><strong class=\"text-white\">契約客製化：<\\/strong>拒絕罐頭合約，針對職務量身訂做防禦型契約。<\\/span>\
+                            <\\/li>\
+                            <li class=\"flex items-start\">\
+                                <i data-lucide=\"check\" class=\"text-gold w-5 h-5 mr-3 mt-1 flex-shrink-0\"><\\/i>\
+                                <span class=\"text-slate-300\"><strong class=\"text-white\">工作規則法制化：<\\/strong>明確定義加班申請與考核，杜絕情緒勒索。<\\/span>\
+                            <\\/li>\
+                        <\\/ul>\
+                    <\\/div>\
+                    <p class=\"text-slate-400 italic font-medium border-l-2 border-slate-600 pl-4\">\
+                        \"一份完善的契約，比請十個律師打官司更便宜。\"\
+                    <\\/p>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/section>\
+\
+    \
+    <section id=\"management\" class=\"py-20 bg-slate-50\">\
+        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\
+            <div class=\"text-center max-w-3xl mx-auto mb-12\">\
+                <span class=\"text-gold font-bold tracking-wider uppercase text-sm\">主題三：管理升級<\\/span>\
+                <h2 class=\"text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4\">AI 時代與彈性工時，您的管理跟上法規了嗎？<\\/h2>\
+                <p class=\"text-slate-600\">Line 交辦工作算加班嗎？導入 AI 如何合法資遣？模糊地帶���是勞資糾紛的溫床。<\\/p>\
+            <\\/div>\
+\
+            <div class=\"grid grid-cols-1 md:grid-cols-2 gap-8\">\
+                <div class=\"bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-slate-900\">\
+                    <div class=\"w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-6\">\
+                        <i data-lucide=\"smartphone\" class=\"text-slate-900 w-6 h-6\"><\\/i>\
+                    <\\/div>\
+                    <h3 class=\"text-xl font-bold text-slate-900 mb-3\">數位工時規範<\\/h3>\
+                    <p class=\"text-slate-600 mb-4\">建立符合法規的「遠端工作打卡機制」與「離線權」規範，避免通訊軟體加班費爭議。<\\/p>\
+                <\\/div>\
+                <div class=\"bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition border-t-4 border-gold\">\
+                    <div class=\"w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-6\">\
+                        <i data-lucide=\"refresh-cw\" class=\"text-gold w-6 h-6\"><\\/i>\
+                    <\\/div>\
+                    <h3 class=\"text-xl font-bold text-slate-900 mb-3\">合法調動與轉型<\\/h3>\
+                    <p class=\"text-slate-600 mb-4\">協助您在數位轉型陣痛期，運用「調動五原則」，以最合諧合法的方式進行組織瘦身。<\\/p>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/section>\
+\
+    \
+    <section class=\"py-20 bg-white border-t border-slate-200\">\
+        <div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\">\
+            <div class=\"bg-slate-900 rounded-2xl p-8 md:p-16 relative overflow-hidden\">\
+                <div class=\"absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl\"><\\/div>\
+                \
+                <div class=\"flex flex-col md:flex-row items-center gap-12 relative z-10\">\
+                    <div class=\"w-full md:w-1/3 text-center\">\
+                        <div class=\"w-48 h-48 mx-auto bg-slate-700 rounded-full border-4 border-gold flex items-center justify-center overflow-hidden mb-6\">\
+                            <i data-lucide=\"user\" class=\"w-24 h-24 text-slate-500\"><\\/i>\
+                        <\\/div>\
+                        <h3 class=\"text-2xl font-bold text-white mb-1\">資深勞資顧問<\\/h3>\
+                        <p class=\"text-gold font-medium\">您的企業戰略夥伴<\\/p>\
+                    <\\/div>\
+                    \
+                    <div class=\"w-full md:w-2/3\">\
+                        <h2 class=\"text-3xl font-bold text-white mb-6\">為什麼選擇我？<\\/h2>\
+                        <p class=\"text-slate-300 mb-8 text-lg leading-relaxed\">\
+                            我不只懂法條，我更懂生意。我不教您鑽法律漏洞，而是教您建立一套讓老闆睡得著覺、員工願意拚命的管理制度。\
+                        <\\/p>\
+                        \
+                        <div class=\"grid grid-cols-1 sm:grid-cols-3 gap-6\">\
+                            <div class=\"text-center p-4 bg-slate-800 rounded-lg border border-slate-700\">\
+                                <div class=\"text-3xl font-black text-gold mb-1\">100+<\\/div>\
+                                <div class=\"text-sm text-slate-400\">經手爭議案例<\\/div>\
+                            <\\/div>\
+                            <div class=\"text-center p-4 bg-slate-800 rounded-lg border border-slate-700\">\
+                                <div class=\"text-3xl font-black text-gold mb-1\">千萬<\\/div>\
+                                <div class=\"text-sm text-slate-400\">節省潛在成本<\\/div>\
+                            <\\/div>\
+                            <div class=\"text-center p-4 bg-slate-800 rounded-lg border border-slate-700\">\
+                                <div class=\"text-3xl font-black text-gold mb-1\">專精<\\/div>\
+                                <div class=\"text-sm text-slate-400\">製造/服務/長照<\\/div>\
+                            <\\/div>\
+                        <\\/div>\
+                    <\\/div>\
+                <\\/div>\
+            <\\/div>\
+        <\\/div>\
+    <\\/section>\
+\
+    \
+    <footer id=\"contact\" class=\"bg-slate-950 pt-20 pb-10\">\
+        <div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center\">\
+            <h2 class=\"text-3xl md:text-4xl font-bold text-white mb-6\">\
+                別等到收到法院傳票才找顧問！\
+            <\\/h2>\
+            <p class=\"text-xl text-slate-400 mb-10\">\
+                現在就完善您的勞資防火牆。留下資料，我們將盡快與您聯繫。\
+            <\\/p>\
+\
+            \
+            <form id=\"contact-form\" class=\"bg-white p-8 rounded-lg shadow-2xl max-w-lg mx-auto mb-12 text-left relative overflow-hidden\">\
+                \
+                <div id=\"contact-success\" class=\"absolute inset-0 bg-white z-20 hidden flex-col items-center justify-center text-center p-6\">\
+                    <div class=\"w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4\">\
+                        <i data-lucide=\"check\" class=\"w-10 h-10 text-green-600\"><\\/i>\
+                    <\\/div>\
+                    <h3 class=\"text-2xl font-bold text-slate-900 mb-2\">預約成功！<\\/h3>\
+                    <p class=\"text-slate-600 mb-6\">感謝您的填寫，顧問將於 48 小時內與您聯繫。<\\/p>\
+                    <button type=\"button\" onclick=\"resetForm()\" class=\"bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 px-6 rounded-full transition duration-300 flex items-center shadow-lg hover:scale-105 transform\">\
+                        <i data-lucide=\"home\" class=\"w-4 h-4 mr-2\"><\\/i>\
+                        回到首頁\
+                    <\\/button>\
+                <\\/div>\
+\
+                <div class=\"mb-4\">\
+                    <label class=\"block text-slate-700 text-sm font-bold mb-2\" for=\"company\">公司名稱<\\/label>\
+                    <input required class=\"shadow appearance-none border rounded w-full py-3 px-4 text-slate-700 leading-tight focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold\" id=\"company\" type=\"text\" placeholder=\"請輸入公司名稱\">\
+                <\\/div>\
+                <div class=\"mb-4\">\
+                    <label class=\"block text-slate-700 text-sm font-bold mb-2\" for=\"name\">聯絡人姓名<\\/label>\
+                    <input required class=\"shadow appearance-none border rounded w-full py-3 px-4 text-slate-700 leading-tight focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold\" id=\"name\" type=\"text\" placeholder=\"請輸入您的稱呼\">\
+                <\\/div>\
+                <div class=\"mb-4\">\
+                    <label class=\"block text-slate-700 text-sm font-bold mb-2\" for=\"phone\">聯絡電話<\\/label>\
+                    <input required class=\"shadow appearance-none border rounded w-full py-3 px-4 text-slate-700 leading-tight focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold\" id=\"phone\" type=\"text\" placeholder=\"09xx-xxx-xxx\">\
+                <\\/div>\
+                \
+                <div class=\"mb-6\">\
+                    <label class=\"block text-slate-700 text-sm font-bold mb-2\" for=\"email\">E-mail<\\/label>\
+                    <input required class=\"shadow appearance-none border rounded w-full py-3 px-4 text-slate-700 leading-tight focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold\" id=\"email\" type=\"email\" placeholder=\"example@company.com\">\
+                <\\/div>\
+                <button type=\"submit\" class=\"w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 flex justify-center items-center group\">\
+                    <span id=\"btn-text\">確定送出<\\/span>\
+                    <i data-lucide=\"chevron-right\" class=\"ml-2 w-5 h-5 group-hover:translate-x-1 transition\"><\\/i>\
+                <\\/button>\
+            <\\/form>\
+\
+            <div class=\"border-t border-slate-800 pt-8\">\
+                <p class=\"text-slate-500 text-sm\">        \
+                    服務專線：0923-869696 許顧問<br>\
+                    E-mail: 360.aiup@gmail.com<br>\
+                    &copy; 2026 凱爾亞力有限公司 資深勞資顧問團隊. All rights reserved.<br>\
+                    <span class=\"text-xs mt-2 block opacity-70\">本網站文案與設計僅供展示，不構成直接法律意見。<\\/span>\
+                <\\/p>\
+            <\\/div>\
+        <\\/div>\
+    <\\/footer>\
+\
+    \
+    <div id=\"password-modal\" class=\"fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 modal\">\
+        <div class=\"bg-slate-900 rounded-lg shadow-2xl p-8 max-w-sm w-full border border-slate-700\">\
+            <h3 class=\"text-xl font-bold text-white mb-4 flex items-center\">\
+                <i data-lucide=\"lock\" class=\"w-6 h-6 text-gold mr-2\"><\\/i>\
+                請輸入解鎖密碼\
+            <\\/h3>\
+            <p class=\"text-slate-400 mb-6 text-sm\">\
+                您今日的免費 AI 診斷次數已達上限 (5次)。請輸入密碼以繼續使用。\
+            <\\/p>\
+            <form id=\"password-form\" class=\"space-y-4\">\
+                <div>\
+                    <input type=\"password\" id=\"unlock-password\" class=\"w-full bg-slate-800 border border-slate-600 rounded px-4 py-2 text-white focus:border-gold focus:outline-none\" placeholder=\"輸入密碼\">\
+                <\\/div>\
+                <div class=\"flex justify-end space-x-3\">\
+                    <button type=\"button\" onclick=\"closeModal()\" class=\"px-4 py-2 text-slate-400 hover:text-white transition\">取消<\\/button>\
+                    <button type=\"submit\" class=\"bg-gold hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded transition\">解鎖<\\/button>\
+                <\\/div>\
+            <\\/form>\
+        <\\/div>\
+    <\\/div>\
+\
+    <script>\
+        \
+        lucide.createIcons();\
+\
+        \
+        document.addEventListener('contextmenu', event => event.preventDefault());\
+        document.addEventListener('keydown', function(e) {\
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {\
+                e.preventDefault();\
+            }\
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {\
+                e.preventDefault();\
+            }\
+        });\
+\
+        \
+        if (typeof google === 'undefined') {\
+            var google = {\
+                script: {\
+                    run: {\
+                        withSuccessHandler: function(successCallback) {\
+                            return {\
+                                withFailureHandler: function(failureCallback) {\
+                                    return {\
+                                        callGeminiServerSide: function(prompt, clientId, password) {\
+                                            setTimeout(() => { successCallback(\"這是模擬的回應。請在 Google Apps Script 中實際執行。\"); }, 1000);\
+                                        },\
+                                        saveContactToSheet: function(data) {\
+                                            setTimeout(() => { successCallback(\"Success\"); }, 800);\
+                                        }\
+                                    };\
+                                }\
+                            };\
+                        }\
+                    }\
+                }\
+            };\
+        }\
+\
+        \
+        function getDeviceId() {\
+            let id = localStorage.getItem('device_id');\
+            if (!id) {\
+                id = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();\
+                localStorage.setItem('device_id', id);\
+            }\
+            return id;\
+        }\
+\
+        \
+        const modal = document.getElementById('password-modal');\
+        const passwordForm = document.getElementById('password-form');\
+        const passwordInput = document.getElementById('unlock-password');\
+        let pendingPrompt = null;\
+\
+        function showModal() {\
+            modal.classList.add('active');\
+            passwordInput.value = '';\
+            passwordInput.focus();\
+        }\
+\
+        function closeModal() {\
+            modal.classList.remove('active');\
+            const loadingDiv = document.getElementById('loading-state');\
+            const placeholderDiv = document.getElementById('result-placeholder');\
+            const resultDiv = document.getElementById('ai-result');\
+            const resultHeader = document.getElementById('ai-result-header');\
+            \
+            loadingDiv.classList.add('hidden');\
+            loadingDiv.classList.remove('flex');\
+            \
+            if (resultDiv.innerHTML.trim() === '') {\
+                 placeholderDiv.classList.remove('hidden');\
+                 if(resultHeader) resultHeader.classList.add('hidden');\
+            } else {\
+                 resultDiv.classList.remove('hidden');\
+                 if(resultHeader) resultHeader.classList.remove('hidden');\
+            }\
+        }\
+\
+        passwordForm.addEventListener('submit', function(e) {\
+            e.preventDefault();\
+            const password = passwordInput.value;\
+            if (password && pendingPrompt) {\
+                callAI(pendingPrompt, password);\
+                modal.classList.remove('active');\
+            }\
+        });\
+\
+        \
+        let currentAiResponse = '';\
+\
+        \
+        function callAI(prompt, password = null) {\
+            const resultDiv = document.getElementById('ai-result');\
+            const loadingDiv = document.getElementById('loading-state');\
+            const placeholderDiv = document.getElementById('result-placeholder');\
+            const resultHeader = document.getElementById('ai-result-header');\
+            const deviceId = getDeviceId();\
+\
+            placeholderDiv.classList.add('hidden');\
+            resultDiv.classList.add('hidden');\
+            if(resultHeader) resultHeader.classList.add('hidden');\
+            loadingDiv.classList.remove('hidden');\
+            loadingDiv.classList.add('flex');\
+\
+            google.script.run\
+                .withSuccessHandler(function(responseText) {\
+                    loadingDiv.classList.add('hidden');\
+                    loadingDiv.classList.remove('flex');\
+                    resultDiv.classList.remove('hidden');\
+                    if(resultHeader) resultHeader.classList.remove('hidden');\
+                    \
+                    currentAiResponse = responseText;\
+                    resultDiv.innerHTML = marked.parse(responseText);\
+                    pendingPrompt = null;\
+                })\
+                .withFailureHandler(function(error) {\
+                    if (error.message && error.message.includes(\"LIMIT_REACHED\")) {\
+                        pendingPrompt = prompt;\
+                        showModal();\
+                    } else if (error.message && error.message.includes(\"PASSWORD_INVALID\")) {\
+                         alert(\"密碼錯誤，請重新輸入。\");\
+                         pendingPrompt = prompt;\
+                         showModal();\
+                    } else {\
+                        console.error(error);\
+                        loadingDiv.classList.add('hidden');\
+                        loadingDiv.classList.remove('flex');\
+                        resultDiv.classList.remove('hidden');\
+                        if (resultDiv.innerHTML.trim() === '' && resultHeader) {\
+                            resultHeader.classList.add('hidden');\
+                        }\
+                        resultDiv.innerHTML = `<p class=\"text-red-400\">系統忙碌中，請稍後再試。<br>錯誤訊息: ${error.message}<\\/p>`;\
+                    }\
+                })\
+                .callGeminiServerSide(prompt, deviceId, password);\
+        }\
+\
+        // --- 列印 / 匯出 PDF 邏輯 ---\
+        function printReport() {\
+            const content = document.getElementById('ai-result').innerHTML;\
+            const printWindow = window.open('', '_blank', 'height=800,width=800');\
+            \
+            if (!printWindow) {\
+                alert(\"請允許本網站開啟彈出視窗以進行列印。\");\
+                return;\
+            }\
+\
+            printWindow.document.write('<!DOCTYPE html><html><head><title>企業勞資風險評估報告<\\/title>');\
+            printWindow.document.write('<style>');\
+            printWindow.document.write('body { font-family: \"Noto Sans TC\", sans-serif; padding: 40px; line-height: 1.6; color: #333; }');\
+            printWindow.document.write('@import url(\"https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap\");');\
+            printWindow.document.write('h1 { font-size: 24px; border-bottom: 2px solid #F59E0B; padding-bottom: 10px; margin-bottom: 20px; color: #000; }');\
+            printWindow.document.write('h2 { font-size: 18px; margin-top: 25px; margin-bottom: 10px; color: #000; background-color: #f3f4f6; padding: 8px; border-left: 4px solid #F59E0B; }');\
+            printWindow.document.write('h3 { font-size: 16px; margin-top: 20px; color: #333; font-weight: bold; }');\
+            printWindow.document.write('strong { color: #d97706; }');\
+            printWindow.document.write('ul, ol { margin-bottom: 15px; padding-left: 20px; }');\
+            printWindow.document.write('li { margin-bottom: 5px; }');\
+            printWindow.document.write('blockquote { border-left: 4px solid #F59E0B; padding-left: 15px; color: #555; background-color: #f9fafb; margin: 20px 0; padding: 10px 15px; font-style: italic; }');\
+            printWindow.document.write('.footer { margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px; text-align: center; font-size: 12px; color: #999; }');\
+            printWindow.document.write('<\\/style><\\/head><body>');\
+            printWindow.document.write('<h1>企業勞資風險評估報告<\\/h1>');\
+            printWindow.document.write('<p style=\"color: #666; font-size: 14px; margin-bottom: 30px;\">報告產生時間: ' + new Date().toLocaleString() + '<\\/p>');\
+            printWindow.document.write(content);\
+            printWindow.document.write('<div class=\"footer\">© 2026 凱爾亞力有限公司 資深勞資顧問團隊<br>本報告由 AI 輔助生成，僅供初步參考，詳細法令遵循請諮詢專業顧問。<\\/div>');\
+            printWindow.document.write('<\\/body><\\/html>');\
+            printWindow.document.close();\
+            \
+            printWindow.focus();\
+            setTimeout(function() { printWindow.print(); }, 500);\
+        }\
+\
+        document.getElementById('ai-form').addEventListener('submit', function(e) {\
+            e.preventDefault();\
+            const industry = document.getElementById('industry').value;\
+            const size = document.getElementById('size').value;\
+            const issue = document.getElementById('issue').value;\
+\
+            if(!issue.trim()) {\
+                alert(\"請輸入您遇到的管理痛點\");\
+                return;\
+            }\
+\
+            const prompt = `你現在是一位台灣資深的勞資顧問。請針對以下企業狀況進行風險評估與建議。\
+\
+            背景資訊：\
+            - 產業：${industry}\
+            - 規模：${size}\
+            - 雇主遇到的痛點/問題：${issue}\
+\
+            請用專業、簡潔、略帶警示但具同理心的口吻回答，讓老闆能聽得進去。\
+            \
+            回答格式請使用 Markdown：\
+            1. **風險評級**：(低/中/高)\
+            2. **潛在法律地雷**：(列出可能違反的勞基法條款或罰則風險)\
+            3. **顧問建議**：(實務上的解決方向，非純法條背誦)\
+            4. **行動呼籲**：(簡短建議，如：建議進行契約盤點)`;\
+\
+            callAI(prompt);\
+        });\
+\
+        \
+        const contactForm = document.getElementById('contact-form');\
+        const successOverlay = document.getElementById('contact-success');\
+        const submitBtn = contactForm.querySelector('button[type=\"submit\"]');\
+        const btnText = document.getElementById('btn-text');\
+\
+        contactForm.addEventListener('submit', function(e) {\
+            e.preventDefault();\
+            const originalText = btnText.innerText;\
+            \
+            submitBtn.disabled = true;\
+            btnText.innerText = \"資料傳送中...\";\
+            \
+            const formData = {\
+                company: document.getElementById('company').value,\
+                name: document.getElementById('name').value,\
+                phone: document.getElementById('phone').value,\
+                email: document.getElementById('email').value,\
+                industry: document.getElementById('industry').value,\
+                size: document.getElementById('size').value,\
+                issue: document.getElementById('issue').value,\
+                aiResult: currentAiResponse \
+            };\
+\
+            google.script.run\
+                .withSuccessHandler(function() {\
+                    successOverlay.classList.remove('hidden');\
+                    successOverlay.classList.add('flex');\
+                    submitBtn.disabled = false;\
+                    btnText.innerText = originalText;\
+                })\
+                .withFailureHandler(function(err) {\
+                    alert(\"傳送失敗，請直接來電聯繫。\");\
+                    submitBtn.disabled = false;\
+                    btnText.innerText = originalText;\
+                })\
+                .saveContactToSheet(formData);\
+        });\
+\
+        function resetForm() {\
+            successOverlay.classList.add('hidden');\
+            successOverlay.classList.remove('flex');\
+            contactForm.reset();\
+            currentAiResponse = '';\
+            window.scrollTo({ top: 0, behavior: 'smooth' });\
+        }\
+    <\\/script>\
+<\\/body>\
+<\\/html>","ncc":"{\"awhs\":true}"}", "", undefined, true , false  , "false", "https://n-gwec5bgorpgbblbtcftwtzcflojy27k2quxsl2i-0lu-script.googleusercontent.com", "https://drive.google.com/abuse?id=AAMpA0RkBwmCIVB9pvbEYlmA-x3NgZ7cXTOwu2UZbNrS7hKJFNBlQjbP4gxluL_jDCcX_C6fD2PFF7xN4NXlhOC1Mj5JxKGBymoTSCP5%3A0&docurl=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycby1Oqvt67Y1eYOAa4Z0odRkU0CnaOC9oXVvLFftP34Fl6lFzU2py8KJ1QcxhhL5Awn-%2Fexec");}
+el.src = 'https://n-gwec5bgorpgbblbtcftwtzcflojy27k2quxsl2i-0lu-script.googleusercontent.com/userCodeAppPanel';
+}());
+</script>
+</body>
+</html>

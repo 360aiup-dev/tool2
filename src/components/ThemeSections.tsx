@@ -31,40 +31,44 @@ export const ThemeSections: React.FC = () => {
 
           <div className="w-full lg:w-1/2">
             <div className="flex items-center mb-4">
-              <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded text-sm font-semibold mr-3 border border-slate-200">
+              <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded text-sm font-semibold mr-3 border border-slate-200">
                 主題一：人才留任
               </span>
               <div className="h-px bg-slate-300 flex-grow"></div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
               加薪也留不住人？<br className="hidden sm:inline" />
-              建立「激勵型」薪資結構
+              因為您缺乏「激勵型」薪資結構
             </h2>
             <p className="text-slate-600 mb-8 leading-relaxed text-lg">
-              盲目調高底薪只會壓縮企業利潤並徒增加班費計算基數。我們團隊協助您設計能留住核心人才、變員工為夥伴的薪酬制度。
+              面對大缺工與基本工資調漲，盲目加底薪只會壓縮獲利。年輕世代看重的是公平性與未來性。
             </p>
 
-            <div className="bg-slate-50 p-6 sm:p-8 rounded-xl border-l-4 border-amber-500 shadow-sm">
+            <div className="bg-slate-50 p-6 sm:p-8 rounded-xl border-l-4 border-amber-500 shadow-sm mb-6">
               <h3 className="font-bold text-slate-900 mb-4 flex items-center text-lg">
                 <Lightbulb className="text-amber-500 mr-2 w-5 h-5 shrink-0" />
-                團隊解決方案
+                顧問解決方案
               </h3>
               <ul className="space-y-3.5 text-slate-700 text-base">
                 <li className="flex items-start">
                   <span className="text-amber-500 font-bold mr-2">•</span>
                   <div>
-                    <strong className="text-slate-900">薪資結構優化：</strong>
-                    拆解保障薪與績效獎金，合法節省成本，降低二代健保、勞保及加班費虛增風險。
+                    <strong className="text-slate-900">薪資結構重組：</strong>
+                    拆解保障薪與績效獎金，合法優化勞健保成本。
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-500 font-bold mr-2">•</span>
                   <div>
                     <strong className="text-slate-900">留才金手銬：</strong>
-                    核心幹部股權、分紅激勵機制與長期留任合約設計，讓關鍵人才與公司命運同頻。
+                    設計核心幹部股權與保單計畫，變員工為夥伴。
                   </div>
                 </li>
               </ul>
+            </div>
+
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-lg p-4 text-amber-900 text-sm font-medium italic">
+              「別讓無效的加薪，變成養懶人的溫床。」
             </div>
           </div>
         </div>
@@ -105,33 +109,37 @@ export const ThemeSections: React.FC = () => {
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-shadow-lg text-white tracking-tight">
               勞檢與訴訟不是機率問題<br />
-              而是內容「防禦強度」問題
+              而是「時間」問題
             </h2>
             <p className="text-slate-200 mb-8 leading-relaxed text-lg font-light">
-              職災法規加嚴，勞權意識抬頭。我們為您建立嚴密的法規防火牆，拒絕讓一張勞檢罰單或勞資調解成為企業的營利破口。
+              職災法規加嚴，勞權意識抬頭。只要一名員工離職後檢舉，一張罰單可能就是幾萬起跳，更別提補發加班費的百萬鉅款。
             </p>
 
-            <div className="bg-slate-800/85 p-6 sm:p-8 rounded-xl border-l-4 border-amber-500 backdrop-blur-sm shadow-xl">
+            <div className="bg-slate-800/85 p-6 sm:p-8 rounded-xl border-l-4 border-amber-500 backdrop-blur-sm shadow-xl mb-6">
               <h3 className="font-bold mb-4 flex items-center text-lg text-white">
                 <ShieldAlert className="text-amber-500 mr-2 w-5 h-5 shrink-0" />
-                團隊解決方案
+                顧問解決方案
               </h3>
               <ul className="space-y-3.5 text-slate-300 text-base">
                 <li className="flex items-start">
                   <span className="text-amber-400 font-bold mr-2">•</span>
                   <div>
                     <strong className="text-amber-300">契約客製化：</strong>
-                    針對醫療院所、產線、業務等不同職務量身訂做勞動契約，避免範本漏洞。
+                    拒絕罐頭合約，針對職務量身訂做防禦型契約。
                   </div>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-400 font-bold mr-2">•</span>
                   <div>
-                    <strong className="text-amber-300">法制化管理：</strong>
-                    完善工作規則送核備與獎懲機制，掌握合法資遣與不適任員工輔導之關鍵舉證鏈。
+                    <strong className="text-amber-300">工作規則法制化：</strong>
+                    明確定義加班申請與考核，杜絕情緒勒索。
                   </div>
                 </li>
               </ul>
+            </div>
+
+            <div className="bg-slate-800/70 border border-slate-700 rounded-lg p-4 text-amber-300 text-sm font-medium italic">
+              「一份完善的契約，比請十個律師打官司更便宜。」
             </div>
           </div>
         </div>
@@ -143,22 +151,25 @@ export const ThemeSections: React.FC = () => {
           <span className="text-amber-600 font-bold tracking-wider uppercase text-sm">
             主題三：管理升級
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-16 tracking-tight">
-            AI 時代與醫管轉型，您的制度跟上了嗎？
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4 tracking-tight">
+            AI 時代與彈性工時，您的管理跟上法規了嗎？
           </h2>
+          <p className="text-slate-600 text-base sm:text-lg mb-14 max-w-3xl mx-auto">
+            LINE交辦工作算加班嗎？導入AI如何合法資遣？模糊地帶正是勞資糾紛的溫床。
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-left">
             <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-lg border-t-4 border-slate-900 hover:shadow-xl transition transform hover:-translate-y-1">
               <div className="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center mb-6 text-slate-900">
                 <Smartphone className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3">數位工時管理</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3">數位工時規範</h3>
               <p className="text-slate-600 text-base leading-relaxed mb-4">
-                建立符合現代混合辦公與通訊軟體環境的「打卡與離線機制」，杜絕隱形加班與 Line 交辦下達後的巨額加班費追討爭議。
+                建立符合法規的「遠端工作打卡機制」與「離線權」規範，避免通訊軟體加班費爭議。
               </p>
               <div className="text-xs text-amber-600 font-semibold flex items-center">
                 <CheckCircle className="w-4 h-4 mr-1" />
-                符合勞基法第30條出勤紀錄規範
+                符合勞動基準法出勤紀錄與離線權合規要求
               </div>
             </div>
 
@@ -166,13 +177,13 @@ export const ThemeSections: React.FC = () => {
               <div className="w-14 h-14 bg-amber-50 rounded-xl flex items-center justify-center mb-6 text-amber-500">
                 <RefreshCw className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3">組織轉型調動</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3">合法調動與轉型</h3>
               <p className="text-slate-600 text-base leading-relaxed mb-4">
-                精準運用勞基法「調動五原則」與績效考核制度，協助企業在業務擴張、門市縮編或整併時進行合法、和諧的人力資源優化。
+                協助您在數位轉型陣痛期，運用「調動五原則」，以最合諧合法的方式進行組織瘦身。
               </p>
               <div className="text-xs text-amber-600 font-semibold flex items-center">
                 <CheckCircle className="w-4 h-4 mr-1" />
-                降低勞資爭議調解與離職金糾紛
+                兼顧組織轉型效率與法制化防禦保護
               </div>
             </div>
           </div>

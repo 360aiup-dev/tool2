@@ -22,7 +22,7 @@ export const Hero: React.FC = () => {
           <div className="inline-flex items-center px-4 py-1.5 mb-6 rounded-full border border-amber-500/40 bg-slate-900/80 backdrop-blur-md shadow-sm">
             <span className="text-amber-400 text-xs sm:text-sm font-bold tracking-wider uppercase flex items-center">
               <ShieldCheck className="w-4 h-4 mr-1.5 text-amber-400" />
-              專業勞資戰略夥伴．頭家神隊友
+              您的勞資戰略顧問
             </span>
           </div>
 
@@ -33,7 +33,7 @@ export const Hero: React.FC = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-slate-100 mb-8 max-w-2xl leading-relaxed text-shadow-lg font-normal">
-            面對大缺工時代與工資調漲，只有合法的「薪酬佈局」與「風險控管」，守護企業辛苦經營的獲利。
+            從大缺工到工資調漲，只有合法的「薪酬佈局」與「風險控管」，才能將人事成本轉化為企業競爭力。
           </p>
 
           {/* Quick value badges */}
@@ -58,14 +58,14 @@ export const Hero: React.FC = () => {
               className="bg-white hover:bg-slate-100 text-slate-900 font-bold py-4 px-8 rounded-lg shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center text-base"
             >
               <Sparkles className="mr-2 h-5 w-5 text-amber-500" />
-              開始 AI 診斷
+              體驗 AI 風險快篩
               <ArrowRight className="ml-2 h-4 w-4 text-slate-700" />
             </a>
             <a
               href="#contact"
               className="border border-slate-600 hover:border-amber-400 text-slate-200 hover:text-white font-medium py-4 px-8 rounded-lg transition backdrop-blur-sm bg-slate-900/40 text-center"
             >
-              預約一對一諮詢
+              立即預約 30 分鐘風險診斷
             </a>
           </div>
         </div>

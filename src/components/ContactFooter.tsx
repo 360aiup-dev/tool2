@@ -150,10 +150,10 @@ export const ContactFooter: React.FC = () => {
         </div>
 
         <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-          完善您的企業防火牆
+          別等到收到法院傳票才找顧問！
         </h2>
         <p className="text-slate-300 mb-12 text-lg sm:text-xl font-normal opacity-90 max-w-xl mx-auto">
-          讓頭家神隊友專家團隊協助您化解爭議，穩健經營、守護利潤
+          現在就完善您的勞資防火牆。留下資料，我們將盡快與您聯繫。
         </p>
 
         {/* Booking Card */}
@@ -165,7 +165,7 @@ export const ContactFooter: React.FC = () => {
               className="absolute inset-0 bg-white z-20 flex flex-col items-center justify-center text-center p-6 sm:p-8 animate-fade-in"
             >
               <CheckCircle className="w-16 h-16 text-emerald-500 mb-2" />
-              <h3 className="text-2xl font-bold text-slate-900 mb-1">預約資料已成功送出！</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-1">預約成功！</h3>
               
               <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900 mb-4 inline-flex items-center">
                 <Mail className="w-3.5 h-3.5 mr-1.5 text-amber-600 shrink-0" />
@@ -173,7 +173,7 @@ export const ContactFooter: React.FC = () => {
               </div>
 
               <p className="text-slate-600 text-xs sm:text-sm mb-4 leading-relaxed max-w-xs">
-                頭家神隊友顧問團隊（許顧問）已排定通知。為確保 100% 收到，您亦可點擊下方按鈕直接由您的信箱發送備份信：
+                感謝您的填寫，顧問將於 48 小時內與您聯繫。為確保 100% 收到，您亦可點擊下方按鈕直接由您的信箱發送備份信：
               </p>
 
               <div className="w-full space-y-2.5 mb-4">
@@ -313,13 +313,13 @@ export const ContactFooter: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="pt-6 space-y-1.5">
             <p className="text-slate-400 text-sm">
-              &copy; 2026 頭家神隊友 顧問團隊. All rights reserved.
+              &copy; 2026 凱爾亞力有限公司 資深勞資顧問團隊. All rights reserved.
             </p>
-            <span className="text-slate-600 block text-xs font-mono italic mt-1.5">
-              版本說明：2026.02.25.V25
-            </span>
+            <p className="text-slate-500 text-xs">
+              本網站文案與分析僅供經營管理策略參考，不構成直接法律意見。
+            </p>
           </div>
         </div>
       </div>

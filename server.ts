@@ -86,6 +86,32 @@ const IRRELEVANT_GUIDANCE_MESSAGE = (issue: string) => `# ⚠️ 勞資戰略快
 
 👉 **請在輸入框中具體描述您目前面臨的團隊或制度痛點**（例如：「員工試用期表現不佳想請他離開，如何避免違法資遣？」或「業務主管離職跳槽競品並私下挖角團隊」），策略人資總監將為您進行深入的法律防火牆檢視與落地方案。`;
 
+function isQuotaExhaustedError(err: any): boolean {
+  if (!err) return false;
+  if (err.status === 429 || err.statusCode === 429) return true;
+  const msg = String(err?.message || "").toLowerCase();
+  return (
+    msg.includes("429") ||
+    msg.includes("resource_exhausted") ||
+    msg.includes("quota") ||
+    msg.includes("rate limit") ||
+    msg.includes("exhausted")
+  );
+}
+
+const QUOTA_EXHAUSTED_MESSAGE = `# ⚠️ 今日AI額度已使用完畢...
+
+抱歉，由於目前系統線上諮詢量踴躍，**今日AI額度已使用完畢...**
+
+系統目前暫時無法為您的自訂情境進行即時全新 AI 運算分析。
+
+### 建議您採取以下方案：
+1. **體驗固定快選範例**：您可以點選上方「常見情境快速填入」的固定快選按鈕（如：出勤與加班、薪資結構優化、不適任員工退場、業務離職帶走客戶等），立即查看由策略人資總監親自精編的完整法規防火牆與戰略實戰示範報告。
+2. **預約策略人資顧問深度諮詢**：若您目前正面臨急迫之勞資爭議、員工檢舉、大量資遣、高額求償或營業秘密外洩，建議直接聯繫頭家神隊友顧問團隊進行一對一深度對談：
+   - **顧問專線**：0923-869696 許顧問
+   - **官方 LINE 預約**：[https://lin.ee/udQp9wm](https://lin.ee/udQp9wm)
+   - **聯絡 Email**：360.aiup@gmail.com`;
+
 // AI Diagnostic endpoint
 app.post("/api/diagnose", async (req, res) => {
   try {
@@ -106,12 +132,25 @@ app.post("/api/diagnose", async (req, res) => {
     }
 
     const ai = getAi();
+    if (!ai) {
+      console.warn("[AI Diagnose] Gemini API key not set in environment.");
+      return res.json({
+        success: true,
+        quotaExceeded: true,
+        report: QUOTA_EXHAUSTED_MESSAGE,
+      });
+    }
+
     let reportMarkdown = "";
+    let hitQuota = false;
 
-    if (ai) {
-      const prompt = `企業經營基本資訊：\n- 產業別：${industry}\n- 公司規模：${size}\n- 實際遭遇的管理痛點與情境：\n${trimmedIssue}`;
+    const prompt = `企業經營基本資訊：
+- 產業別：${industry}
+- 公司規模：${size}
+- 實際遭遇的管理痛點與情境：
+${trimmedIssue}`;
 
-      const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監 (Strategic HR Director / HRBP)」及資深勞動法令顧問。
+    const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監 (Strategic HR Director / HRBP)」及資深勞動法令顧問。
 你的對話對象是企業主、創辦人或經營決策階層。你擅長跳脫傳統人資行政思維，將「勞動法規遵循」轉化為企業的「商業競爭力」、「護城河」與「人才密度策略」。
 
 【極其重要的輸入真實性與相關性檢驗】：
@@ -137,68 +176,61 @@ app.post("/api/diagnose", async (req, res) => {
 
 請全程使用專業繁體中文 (台灣用語習慣)，展現頂尖策略顧問的高度與穿透力。`;
 
-      const candidateModels = [
-        "gemini-3.1-flash-lite",
-        "gemini-3.8-flash",
-        "gemini-flash-latest"
-      ];
+    // Standard Gemini 3 models according to Google GenAI SDK
+    const candidateModels = [
+      "gemini-3.8-flash",
+      "gemini-3.1-flash-lite",
+      "gemini-flash-latest"
+    ];
 
-      for (const model of candidateModels) {
-        try {
-          const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-              systemInstruction,
-              temperature: 0.7,
-              maxOutputTokens: 3500,
-            },
-          });
+    for (const model of candidateModels) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            systemInstruction,
+            temperature: 0.7,
+          },
+        });
 
-          if (response.text && response.text.trim()) {
-            reportMarkdown = response.text.trim();
-            console.log(`[AI Diagnose] Successfully generated report with model: ${model}`);
-            break;
-          }
-        } catch (modelErr: any) {
-          console.warn(`[AI Diagnose] Model ${model} failed (${modelErr?.status || modelErr?.message}), trying next...`);
+        if (response.text && response.text.trim()) {
+          reportMarkdown = response.text.trim();
+          console.log(`[AI Diagnose] Successfully generated real AI report with model: ${model}`);
+          break;
+        }
+      } catch (modelErr: any) {
+        console.warn(`[AI Diagnose] Model ${model} failed (${modelErr?.status || modelErr?.message})`);
+        if (isQuotaExhaustedError(modelErr)) {
+          hitQuota = true;
         }
       }
     }
 
-    // Fallback if AI key missing or empty response
+    // If quota was exhausted or model failed to generate response
     if (!reportMarkdown) {
-      reportMarkdown = `# 企業勞資戰略診斷報告
-
-1. **現況分析與商業影響：**
-貴司（${industry}，規模約${size}）所遇「${issue.slice(0, 30)}...」，核心盲點在於出勤紀錄與薪酬結構未落實法制化防禦閉環。模糊的管理界限易削弱團隊士氣與人才密度，更會因非經常性給與認定爭議或隱形加班爭議，面臨勞動檢查直接裁罰與追溯工資給付，直接侵蝕企業核心利潤。
-
-2. **風險評級：**
-高
-
-3. **法律防火牆清單：**
-
-| 法源依據(請列出具體法條) | 潛在違規行為 | 預估財務風險/罰鍰(請列出預估罰鍰金額與具體罰鍰條款) |
-| :--- | :--- | :--- |
-| **勞動基準法第24條、第39條** | 加班費與假日出勤工資基數未納入經常性給與 | 依勞基法第79條第1項第1款，處 NT$ 2萬 ～ 100萬元罰鍰，得按次連續處罰並公佈名稱 |
-| **勞動基準法第30條第5項、第6項** | 未詳實備置記錄至分鐘之出勤紀錄，或下班後通訊軟體交辦未建立補登機制 | 依勞基法第79條第2項，處 NT$ 9萬 ～ 45萬元罰鍰 |
-| **勞動基準法第11條、第12條、第16條** | 不適任員工退場未符合「解僱最後手段性原則」即逕行終止契約 | 勞工得提起確認僱傭關係訴訟，雇主須補發爭訟期間全額工資、法定利息與勞保退休金 |
-
-4. **策略建議 (Action Plan)：**
-- **重塑激勵型薪資結構**：清楚切割勞務對價底薪與績效激勵分紅，合法降低二代健保、勞保負擔及加班費膨脹風險。
-- **建立數位出勤與離線原則規範**：制定非工作時間 Line/通訊軟體回覆作業規範與加班事前審批流程，杜絕勞檢隱形加班地雷。
-- **啟動績效輔導 (PIP) 書面化留痕**：針對不適任人員落實輔導紀錄與定期面談考核，完備合規調動與合法退場之鐵證鏈。
-- **盤點並核備工作規則與勞動契約**：增訂符合業務現況之職能調動五原則與保密條款，將法規遵循化為企業組織競爭力。
-
-*提示：請務必諮詢當地勞動法律顧問以確保合規*`;
+      console.log(`[AI Diagnose] Real AI generation unavailable (hitQuota=${hitQuota}), returning quota notification.`);
+      return res.json({
+        success: true,
+        quotaExceeded: true,
+        report: QUOTA_EXHAUSTED_MESSAGE,
+      });
     }
 
     return res.json({
       success: true,
+      quotaExceeded: false,
       report: reportMarkdown,
     });
   } catch (error: any) {
     console.error("Diagnosis error:", error);
+    if (isQuotaExhaustedError(error)) {
+      return res.json({
+        success: true,
+        quotaExceeded: true,
+        report: QUOTA_EXHAUSTED_MESSAGE,
+      });
+    }
     return res.status(500).json({
       error: "SERVER_ERROR",
       message: error?.message || "診斷分析發生異常，請稍候重試或聯絡顧問專線。",

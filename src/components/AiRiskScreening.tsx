@@ -20,6 +20,7 @@ export const AiRiskScreening: React.FC = () => {
   const [renderedHtml, setRenderedHtml] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
+  const [reportType, setReportType] = useState<"preset" | "real_ai" | "quota" | "guidance">("real_ai");
 
   const resultContainerRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +42,24 @@ export const AiRiskScreening: React.FC = () => {
       title: "醫療/輪班排班",
       text: "單位涉及輪班與值班，排班表常超出正常工時，如何合法實施變形工時、簽署同意書並召開勞資會議？",
     },
+    {
+      title: "業務離職帶走客戶",
+      text: "業務主管離職跳槽到競爭對手，私下透過通訊軟體帶走核心客戶名單與重要報價資訊，公司如何透過競業禁止與營業秘密法維護權益？",
+    },
   ];
+
+  const QUOTA_EXHAUSTED_CLIENT_MESSAGE = `# ⚠️ 今日AI額度已使用完畢...
+
+抱歉，由於目前系統線上諮詢量踴躍，**今日AI額度已使用完畢...**
+
+系統目前暫時無法為您的自訂情境進行即時全新 AI 運算分析。
+
+### 建議您採取以下方案：
+1. **體驗固定快選範例**：您可以點選左側「常見情境快速填入」的固定快選按鈕（如：出勤與加班、薪資結構優化、不適任員工退場、業務離職帶走客戶等），立即查閱由策略人資總監親自精編的完整法規防火牆與戰略實戰示範報告。
+2. **預約策略人資顧問深度諮詢**：若您目前正面臨急迫之勞資爭議、員工檢舉、大量資遣、高額求償或營業秘密外洩，建議直接聯繫頭家神隊友顧問團隊進行一對一深度對談：
+   - **顧問專線**：0923-869696 許顧問
+   - **官方 LINE 預約**：[https://lin.ee/udQp9wm](https://lin.ee/udQp9wm)
+   - **聯絡 Email**：360.aiup@gmail.com`;
 
   const isIrrelevantIssue = (iss: string): boolean => {
     const trimmed = iss.trim();
@@ -252,14 +270,63 @@ export const AiRiskScreening: React.FC = () => {
     setReportMarkdown("");
     setRenderedHtml("");
 
+    const trimmedIssue = issue.trim();
+
+    // 1. Check if user selected one of the fixed presets ("固定快選")
+    const matchedPreset = presets.find(
+      (p) => p.text.trim() === trimmedIssue || trimmedIssue.includes(p.text.trim())
+    );
+
+    if (matchedPreset) {
+      // For fixed preset, show the curated strategic showcase report without burning API quota
+      const reportText = getBaselineDiagnosisReport(industry, size, matchedPreset.text);
+      setReportType("preset");
+      setReportMarkdown(reportText);
+      const parsed = await marked.parse(reportText);
+      setRenderedHtml(parsed);
+      setIsLoading(false);
+
+      try {
+        localStorage.setItem(
+          "last_diagnosis_data",
+          JSON.stringify({
+            industry,
+            size,
+            issue: trimmedIssue,
+            aiResult: reportText,
+          })
+        );
+      } catch (e) {
+        // ignore storage quota
+      }
+
+      if (window.innerWidth < 768 && resultContainerRef.current) {
+        resultContainerRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+
+    // 2. Check if input is completely irrelevant (e.g. "肚子餓")
+    if (isIrrelevantIssue(trimmedIssue)) {
+      const guidance = getBaselineDiagnosisReport(industry, size, trimmedIssue);
+      setReportType("guidance");
+      setReportMarkdown(guidance);
+      const parsed = await marked.parse(guidance);
+      setRenderedHtml(parsed);
+      setIsLoading(false);
+      return;
+    }
+
+    // 3. For ALL other inputs: Real AI diagnosis must be executed!
     try {
       const payload = {
         industry,
         size,
-        issue: issue.trim(),
+        issue: trimmedIssue,
       };
 
       let reportText = "";
+      let hitQuotaExceeded = false;
 
       try {
         const response = await fetch("/api/diagnose", {
@@ -270,17 +337,32 @@ export const AiRiskScreening: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.report) {
+          if (data.quotaExceeded || data.report?.includes("今日AI額度已使用完畢")) {
+            hitQuotaExceeded = true;
+            reportText = data.report || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+          } else if (data.success && data.report) {
             reportText = data.report;
           }
+        } else if (response.status === 429) {
+          hitQuotaExceeded = true;
+          reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+        } else {
+          // If server returns error, show quota exhausted notice
+          hitQuotaExceeded = true;
+          reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
         }
       } catch (apiErr) {
-        console.warn("Backend API not reachable (static host mode), using strategic baseline generator:", apiErr);
+        console.warn("Backend API call failed, presenting quota exhausted notification:", apiErr);
+        hitQuotaExceeded = true;
+        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
       }
 
-      // If backend not present (e.g. GitHub Pages static hosting), use high-standard strategic generator
-      if (!reportText) {
-        reportText = getBaselineDiagnosisReport(industry, size, issue.trim());
+      // If quota was hit or real AI was not available, present the required quota notice
+      if (hitQuotaExceeded || !reportText) {
+        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+        setReportType("quota");
+      } else {
+        setReportType("real_ai");
       }
 
       setReportMarkdown(reportText);
@@ -293,7 +375,7 @@ export const AiRiskScreening: React.FC = () => {
           JSON.stringify({
             industry,
             size,
-            issue,
+            issue: trimmedIssue,
             aiResult: reportText,
           })
         );
@@ -307,7 +389,11 @@ export const AiRiskScreening: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Diagnosis error:", err);
-      setErrorMessage(err.message || "系統忙碌中，請稍後再試。");
+      // Even on unhandled error, show the clear quota/busy message as requested
+      setReportType("quota");
+      setReportMarkdown(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
+      const parsed = await marked.parse(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
+      setRenderedHtml(parsed);
     } finally {
       setIsLoading(false);
     }
@@ -540,21 +626,30 @@ export const AiRiskScreening: React.FC = () => {
 
               {/* Quick Presets */}
               <div>
-                <span className="block text-xs font-semibold text-slate-400 mb-2 flex items-center">
-                  <Lightbulb className="w-3.5 h-3.5 mr-1 text-amber-400" />
-                  常見情境快速填入：
+                <span className="block text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Lightbulb className="w-3.5 h-3.5 mr-1 text-amber-400" />
+                    常見情境固定快選（免消耗 AI 額度）：
+                  </span>
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {presets.map((p, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setIssue(p.text)}
-                      className="text-xs bg-slate-900/80 hover:bg-slate-700 text-slate-300 hover:text-amber-400 px-2.5 py-1 rounded border border-slate-700 transition"
-                    >
-                      {p.title}
-                    </button>
-                  ))}
+                  {presets.map((p, idx) => {
+                    const isSelected = issue.trim() === p.text.trim();
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setIssue(p.text)}
+                        className={`text-xs px-2.5 py-1 rounded border transition ${
+                          isSelected
+                            ? "bg-amber-500/20 border-amber-500 text-amber-300 font-semibold"
+                            : "bg-slate-900/80 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border-slate-700"
+                        }`}
+                      >
+                        {p.title}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -635,8 +730,29 @@ export const AiRiskScreening: React.FC = () => {
                   className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3"
                 >
                   <div className="flex items-center space-x-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                    <h3 className="text-white font-bold text-base">診斷建議摘要</h3>
+                    {reportType === "quota" ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                        <h3 className="text-amber-400 font-bold text-base">今日AI額度已使用完畢</h3>
+                      </>
+                    ) : reportType === "preset" ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                        <h3 className="text-white font-bold text-base">固定快選示範報告</h3>
+                        <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded">固定快選</span>
+                      </>
+                    ) : reportType === "guidance" ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                        <h3 className="text-amber-400 font-bold text-base">勞資戰略快篩提示</h3>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                        <h3 className="text-white font-bold text-base">AI 即時診斷報告</h3>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">即時 AI 運算</span>
+                      </>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
