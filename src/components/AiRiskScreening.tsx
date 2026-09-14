@@ -8,6 +8,8 @@ import {
   AlertTriangle,
   Lightbulb,
   Check,
+  Cpu,
+  RefreshCw,
 } from "lucide-react";
 import type { IndustryType, CompanySizeType } from "../types";
 
@@ -21,6 +23,7 @@ export const AiRiskScreening: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
   const [reportType, setReportType] = useState<"preset" | "real_ai" | "quota" | "guidance">("real_ai");
+  const [modelEngineInfo, setModelEngineInfo] = useState<{ model: string; isDegraded: boolean } | null>(null);
 
   const resultContainerRef = useRef<HTMLDivElement>(null);
 
@@ -266,9 +269,6 @@ export const AiRiskScreening: React.FC = () => {
     }
 
     setErrorMessage("");
-    setIsLoading(true);
-    setReportMarkdown("");
-    setRenderedHtml("");
 
     const trimmedIssue = issue.trim();
 
@@ -278,6 +278,9 @@ export const AiRiskScreening: React.FC = () => {
     );
 
     if (matchedPreset) {
+      setIsLoading(true);
+      setReportMarkdown("");
+      setRenderedHtml("");
       // For fixed preset, show the curated strategic showcase report without burning API quota
       const reportText = getBaselineDiagnosisReport(industry, size, matchedPreset.text);
       setReportType("preset");
@@ -308,6 +311,9 @@ export const AiRiskScreening: React.FC = () => {
 
     // 2. Check if input is completely irrelevant (e.g. "肚子餓")
     if (isIrrelevantIssue(trimmedIssue)) {
+      setIsLoading(true);
+      setReportMarkdown("");
+      setRenderedHtml("");
       const guidance = getBaselineDiagnosisReport(industry, size, trimmedIssue);
       setReportType("guidance");
       setReportMarkdown(guidance);
@@ -317,7 +323,11 @@ export const AiRiskScreening: React.FC = () => {
       return;
     }
 
-    // 3. For ALL other inputs: Real AI diagnosis must be executed!
+    setIsLoading(true);
+    setReportMarkdown("");
+    setRenderedHtml("");
+
+    // 3. For custom inputs: Real AI diagnosis with automatic model fallback!
     try {
       const payload = {
         industry,
@@ -342,6 +352,12 @@ export const AiRiskScreening: React.FC = () => {
             reportText = data.report || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
           } else if (data.success && data.report) {
             reportText = data.report;
+            if (data.modelUsed) {
+              setModelEngineInfo({
+                model: data.modelUsed,
+                isDegraded: Boolean(data.isDegraded),
+              });
+            }
           }
         } else if (response.status === 429) {
           hitQuotaExceeded = true;
@@ -752,6 +768,24 @@ export const AiRiskScreening: React.FC = () => {
                         <h3 className="text-white font-bold text-base">AI 即時診斷報告</h3>
                         <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">即時 AI 運算</span>
                       </>
+                    )}
+
+                    {reportType === "real_ai" && modelEngineInfo && (
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded border flex items-center ${
+                          modelEngineInfo.isDegraded
+                            ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                            : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                        }`}
+                        title={
+                          modelEngineInfo.isDegraded
+                            ? "目前線上負載較高，系統已自動啟用階梯降級機制切換至節能 Lite 模型，保障服務不中斷"
+                            : "使用 Google Gemini 深度推理引擎分析"
+                        }
+                      >
+                        <Cpu className="w-3 h-3 mr-1" />
+                        {modelEngineInfo.isDegraded ? "已自動降級為輕量模型" : "Gemini 深度引擎"}
+                      </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">

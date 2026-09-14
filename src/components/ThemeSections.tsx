@@ -139,7 +139,7 @@ export const ThemeSections: React.FC = () => {
             </div>
 
             <div className="bg-slate-800/70 border border-slate-700 rounded-lg p-4 text-amber-300 text-sm font-medium italic">
-              「一份完善的契約，比請十個律師打官司更便宜。」
+              「一份完善的契約，比請律師打官司更便宜。」
             </div>
           </div>
         </div>

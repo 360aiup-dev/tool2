@@ -176,12 +176,17 @@ ${trimmedIssue}`;
 
 請全程使用專業繁體中文 (台灣用語習慣)，展現頂尖策略顧問的高度與穿透力。`;
 
-    // Standard Gemini 3 models according to Google GenAI SDK
+    // Standard Gemini models with progressive degradation (Cascade fallback)
+    // Primary balanced -> High-throughput Lite -> Proven 2.5 Flash -> Low-cost Lite
     const candidateModels = [
       "gemini-3.8-flash",
       "gemini-3.1-flash-lite",
-      "gemini-flash-latest"
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-flash-latest",
     ];
+
+    let modelUsed = "";
 
     for (const model of candidateModels) {
       try {
@@ -191,16 +196,18 @@ ${trimmedIssue}`;
           config: {
             systemInstruction,
             temperature: 0.7,
+            maxOutputTokens: 2200,
           },
         });
 
         if (response.text && response.text.trim()) {
           reportMarkdown = response.text.trim();
+          modelUsed = model;
           console.log(`[AI Diagnose] Successfully generated real AI report with model: ${model}`);
           break;
         }
       } catch (modelErr: any) {
-        console.warn(`[AI Diagnose] Model ${model} failed (${modelErr?.status || modelErr?.message})`);
+        console.warn(`[AI Diagnose] Model ${model} failed (${modelErr?.status || modelErr?.message}), trying next fallback model...`);
         if (isQuotaExhaustedError(modelErr)) {
           hitQuota = true;
         }
@@ -221,6 +228,8 @@ ${trimmedIssue}`;
       success: true,
       quotaExceeded: false,
       report: reportMarkdown,
+      modelUsed,
+      isDegraded: modelUsed.includes("lite"),
     });
   } catch (error: any) {
     console.error("Diagnosis error:", error);
