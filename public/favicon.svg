@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded Shield Base -->
+  <path d="M32 4 C44 4, 56 8, 56 22 C56 40, 43 53, 32 60 C21 53, 8 40, 8 22 C8 8, 20 4, 32 4 Z" 
+        fill="url(#shieldGrad)" 
+        stroke="url(#goldGrad)" 
+        stroke-width="3"
+        filter="url(#shadow)"/>
+  
+  <!-- Inner Shield Accent Rim -->
+  <path d="M32 9 C41 9, 51 12, 51 23 C51 37, 40 48, 32 54 C24 48, 13 37, 13 23 C13 12, 23 9, 32 9 Z" 
+        fill="none" 
+        stroke="#F59E0B" 
+        stroke-width="1.2" 
+        stroke-opacity="0.5"/>
+
+  <!-- Golden Checkmark -->
+  <path d="M22 31 L29 38 L43 23" 
+        fill="none" 
+        stroke="url(#goldGrad)" 
+        stroke-width="5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+</svg>

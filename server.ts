@@ -31,6 +31,17 @@ function getAi(): GoogleGenAI | null {
   return aiClient;
 }
 
+// Enable CORS for external requests or previews
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // Health check endpoint
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
@@ -49,53 +60,56 @@ app.post("/api/diagnose", async (req, res) => {
     let reportMarkdown = "";
 
     if (ai) {
-      const prompt = `以下是企業經營資訊：\n- 產業：${industry}\n- 規模：${size}\n- 遇到的問題：${issue.trim()}`;
+      const prompt = `企業經營基本資訊：\n- 產業別：${industry}\n- 公司規模：${size}\n- 實際遭遇的管理痛點與情境：\n${issue.trim()}`;
 
-      const systemInstruction = `你現在是一位擁有 20 年經驗、曾在 Fortune 500 企業服務的「策略型人資總監 (Strategic HR Director / HRBP)」。
-你的對話對象是企業主 (老闆)。你擅長將「法規遵循」轉化為「商業競爭力」。
+      const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監 (Strategic HR Director / HRBP)」及資深勞動法令顧問。
+你的對話對象是企業主、創辦人或經營決策階層。你擅長跳脫傳統人資行政思維，將「勞動法規遵循」轉化為企業的「商業競爭力」、「護城河」與「人才密度策略」。
 
-回答規範：
-1. **商業優先**：簡短分析該問題如何阻礙業務成長或損害利潤。
-2. **顧問姿態**：運用專業框架，直接指出經營盲點。
-3. **人才密度**：主張優化制度以留住優秀人才並處理不適任者。
-4. **極簡風格**：內容力求精準，不說廢話。
-5. **第一行標題**：# 企業勞資戰略診斷報告
+【核心回答要求】：
+1. **深度個性化分析**：必須完全針對企業主提供的「具體情境與痛點細節」展開思考，嚴禁任何千篇一律的樣板套話！分析時請直接點破此問題背後暴露的組織管理盲點、出勤/制度漏洞與企業主的時間/利潤損耗。
+2. **精準法規與財務風險**：根據台灣最新勞動法規（如勞基法、性別平等工作法、營業秘密法、職安法、勞保條例等），精準匹配該情境觸犯的具體法條、可能面臨的勞檢罰鍰額度（請標示新台幣金額範圍）與民刑事責任。
+3. **高維度落地方案 (Action Plan)**：提供 3-5 項專屬該情境的戰略解法（如制度設計、變形工時、薪資結構切割、PIP績效改善流程、競業避險等），每項方案必須點出「實務做法」與「帶給企業的商業優勢」。
+4. **格式規範**：
+第一行必須為：# 企業勞資戰略診斷報告
+接著依序呈現：
+### 1. 現況剖析與商業打擊
+（深入剖析該情境對利潤、營運效能與組織士氣的實質傷害）
+### 2. 風險評級
+（依據違法裁罰風險與財務衝擊，評定為：中度風險 / 高度風險 / 極高風險）
+### 3. 法律防火牆與違規裁罰清單
+（以 Markdown 表格呈現，欄位為：法源依據(具體條號) | 潛在違規行為 | 預估財務風險/罰鍰金額(依主管機關最新裁罰標準)）
+### 4. 策略總監實戰方案 (Action Plan)
+（3-5 項清晰實戰步驟，直擊問題根源）
+### 5. 總監策略心法
+（給企業主的一句高維度管理忠告）
 
-請嚴格依照以下順序回覆：
+請全程使用專業繁體中文 (台灣用語習慣)，展現頂尖策略顧問的高度與穿透力。`;
 
-1. **現況分析與商業影響：** (簡短精準分析對營運的負面影響)
-2. **風險評級：** (低/中/高)
-3. **法律防火牆清單：** (Markdown 表格，僅列出直接相關法條。欄位：法源依據(請列出具體法條) | 潛在違規行為 | 預估財務風險/罰鍰(請列出預估罰鍰金額與具體罰鍰條款))
-4. **策略建議 (Action Plan)：** (3-5 項核心建議。僅使用主項目符號，內容簡短精準，不需次級項目。)
+      const candidateModels = [
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-flash-latest"
+      ];
 
-*提示：請務必諮詢當地勞動法律顧問以確保合規*`;
-
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3.8-flash",
-          contents: prompt,
-          config: {
-            systemInstruction,
-            temperature: 0.7,
-            maxOutputTokens: 3000,
-          },
-        });
-
-        reportMarkdown = response.text || "";
-      } catch (err1: any) {
+      for (const model of candidateModels) {
         try {
           const response = await ai.models.generateContent({
-            model: "gemini-flash-latest",
+            model,
             contents: prompt,
             config: {
               systemInstruction,
               temperature: 0.7,
-              maxOutputTokens: 3000,
+              maxOutputTokens: 3500,
             },
           });
-          reportMarkdown = response.text || "";
-        } catch (genError: any) {
-          console.warn("Gemini API call failed, using baseline fallback:", genError?.message);
+
+          if (response.text && response.text.trim()) {
+            reportMarkdown = response.text.trim();
+            console.log(`[AI Diagnose] Successfully generated report with model: ${model}`);
+            break;
+          }
+        } catch (modelErr: any) {
+          console.warn(`[AI Diagnose] Model ${model} failed (${modelErr?.status || modelErr?.message}), trying next...`);
         }
       }
     }
