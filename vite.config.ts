@@ -4,7 +4,14 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  const isGitHubPages = process.env.GITHUB_PAGES === "true" || Boolean(process.env.GITHUB_REPOSITORY);
+  const repoName = process.env.GITHUB_REPOSITORY
+    ? `/${process.env.GITHUB_REPOSITORY.split("/")[1]}/`
+    : "/tool2/";
+  const base = isGitHubPages ? repoName : "./";
+
   return {
+    base,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
