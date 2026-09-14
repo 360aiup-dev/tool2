@@ -47,6 +47,45 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+function checkIssueRelevance(issue: string): boolean {
+  const trimmed = issue.trim();
+  if (trimmed.length < 3) return false;
+
+  const normalized = trimmed.toLowerCase();
+  const irrelevantPatterns = [
+    /^肚子[餓饿]/,
+    /^[餓饿]了?$/,
+    /^[想好]睡(覺|觉)?$/,
+    /^[好超很]累$/,
+    /^(早安|午安|晚安|你好|您好|哈囉|hello|hi|hey|嗨)$/,
+    /^(測試|test|testing|123|1234|abc)$/,
+    /^(吃(飯|麵|飯了嗎|飽沒|什麼)|午餐|早餐|晚餐)$/,
+    /^(天氣|好熱|好冷|下雨)$/,
+    /^(你是誰|什麼名字|人工智慧|chatgpt)$/
+  ];
+
+  for (const pattern of irrelevantPatterns) {
+    if (pattern.test(normalized)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+const IRRELEVANT_GUIDANCE_MESSAGE = (issue: string) => `# ⚠️ 勞資戰略快篩提示
+
+您輸入的內容（「${issue}」）並非企業經營管理、勞動法令或人力資源之相關情境。
+
+**【本快篩專為企業主與主管診斷以下核心領域】：**
+1. **工時與出勤**：排班調移、打卡紀錄、加班費計算爭議、下班後通訊軟體交辦
+2. **勞動契約與退場**：試用期考核標準、不適任資遣、懲戒解僱、PIP 輔導、合意離職協議
+3. **商業資產防禦**：離職挖角、客戶名單帶走、營業秘密外洩、競業禁止條款
+4. **薪資結構與福利**：底薪與獎金科目重組、高薪低報避險、二代健保與勞退合規
+5. **勞檢與爭議處理**：勞工局勞動檢查應對、勞資爭議調解、職場霸凌與性騷擾防治
+
+👉 **請在輸入框中具體描述您目前面臨的團隊或制度痛點**（例如：「員工試用期表現不佳想請他離開，如何避免違法資遣？」或「業務主管離職跳槽競品並私下挖角團隊」），策略人資總監將為您進行深入的法律防火牆檢視與落地方案。`;
+
 // AI Diagnostic endpoint
 app.post("/api/diagnose", async (req, res) => {
   try {
@@ -56,14 +95,27 @@ app.post("/api/diagnose", async (req, res) => {
       return res.status(400).json({ error: "請提供具體的管理情境或疑問。" });
     }
 
+    const trimmedIssue = issue.trim();
+
+    // Check if input is relevant to enterprise labor / HR management
+    if (!checkIssueRelevance(trimmedIssue)) {
+      return res.json({
+        success: true,
+        report: IRRELEVANT_GUIDANCE_MESSAGE(trimmedIssue),
+      });
+    }
+
     const ai = getAi();
     let reportMarkdown = "";
 
     if (ai) {
-      const prompt = `企業經營基本資訊：\n- 產業別：${industry}\n- 公司規模：${size}\n- 實際遭遇的管理痛點與情境：\n${issue.trim()}`;
+      const prompt = `企業經營基本資訊：\n- 產業別：${industry}\n- 公司規模：${size}\n- 實際遭遇的管理痛點與情境：\n${trimmedIssue}`;
 
       const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監 (Strategic HR Director / HRBP)」及資深勞動法令顧問。
 你的對話對象是企業主、創辦人或經營決策階層。你擅長跳脫傳統人資行政思維，將「勞動法規遵循」轉化為企業的「商業競爭力」、「護城河」與「人才密度策略」。
+
+【極其重要的輸入真實性與相關性檢驗】：
+如果企業主輸入的內容與「企業管理、勞資關係、人力資源、勞動法令、組織營運」無關（如日常打招呼、生理需求、測試亂碼等），請【絕對嚴禁】強行曲解為勞資違法高風險！此時請直接輸出【⚠️ 勞資戰略快篩提示】，委婉告知非勞資問題並指引可諮詢領域。
 
 【核心回答要求】：
 1. **深度個性化分析**：必須完全針對企業主提供的「具體情境與痛點細節」展開思考，嚴禁任何千篇一律的樣板套話！分析時請直接點破此問題背後暴露的組織管理盲點、出勤/制度漏洞與企業主的時間/利潤損耗。
