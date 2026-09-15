@@ -22,10 +22,43 @@ export const AiRiskScreening: React.FC = () => {
   const [renderedHtml, setRenderedHtml] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
-  const [reportType, setReportType] = useState<"preset" | "real_ai" | "quota" | "guidance">("real_ai");
+  const [reportType, setReportType] = useState<
+    "preset" | "real_ai" | "quota" | "guidance" | "strategic_engine"
+  >("real_ai");
   const [modelEngineInfo, setModelEngineInfo] = useState<{ model: string; isDegraded: boolean } | null>(null);
 
   const resultContainerRef = useRef<HTMLDivElement>(null);
+
+  // Dynamically resolve backend API endpoints across GitHub Pages and Cloud Run
+  const getCandidateApiUrls = (path: string): string[] => {
+    const urls: string[] = [];
+    const metaEnv = (import.meta as any).env || {};
+    const custom = metaEnv.VITE_API_URL || metaEnv.VITE_BACKEND_URL;
+    if (custom && typeof custom === "string" && custom.startsWith("http")) {
+      urls.push(`${custom.replace(/\/+$/, "")}${path}`);
+    }
+
+    const isGitHubPages =
+      typeof window !== "undefined" &&
+      (window.location.hostname.includes("github.io") ||
+        window.location.hostname.includes("localhost") === false &&
+        !window.location.hostname.includes("run.app"));
+
+    if (isGitHubPages) {
+      // Prioritize the live active production Cloud Run backend
+      urls.push(`https://ais-pre-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
+      urls.push(`https://ais-dev-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
+    }
+
+    // Relative endpoint (default for local dev and direct Cloud Run)
+    urls.push(path);
+
+    if (!isGitHubPages) {
+      urls.push(`https://ais-pre-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
+    }
+
+    return Array.from(new Set(urls));
+  };
 
   // Quick Preset Issue Templates
   const presets = [
@@ -327,7 +360,7 @@ export const AiRiskScreening: React.FC = () => {
     setReportMarkdown("");
     setRenderedHtml("");
 
-    // 3. For custom inputs: Real AI diagnosis with automatic model fallback!
+    // 3. For custom inputs: Real AI diagnosis with multi-endpoint & automatic fallback!
     try {
       const payload = {
         industry,
@@ -336,49 +369,57 @@ export const AiRiskScreening: React.FC = () => {
       };
 
       let reportText = "";
-      let hitQuotaExceeded = false;
+      let modelUsedName = "";
+      let isDegradedModel = false;
+      let isRealAiSuccess = false;
 
-      try {
-        const response = await fetch("/api/diagnose", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+      // Try endpoints sequentially: Cloud Run backend (for GitHub Pages), custom URL, and relative API
+      const candidateEndpoints = getCandidateApiUrls("/api/diagnose");
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.quotaExceeded || data.report?.includes("今日AI額度已使用完畢")) {
-            hitQuotaExceeded = true;
-            reportText = data.report || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
-          } else if (data.success && data.report) {
-            reportText = data.report;
-            if (data.modelUsed) {
-              setModelEngineInfo({
-                model: data.modelUsed,
-                isDegraded: Boolean(data.isDegraded),
-              });
+      for (const endpoint of candidateEndpoints) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.report && !data.quotaExceeded) {
+              reportText = data.report;
+              modelUsedName = data.modelUsed || "Gemini Flash";
+              isDegradedModel = Boolean(data.isDegraded);
+              isRealAiSuccess = true;
+              break;
             }
           }
-        } else if (response.status === 429) {
-          hitQuotaExceeded = true;
-          reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
-        } else {
-          // If server returns error, show quota exhausted notice
-          hitQuotaExceeded = true;
-          reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+        } catch (endpointErr) {
+          console.warn(`[AI Diagnosis] Endpoint ${endpoint} attempt failed:`, endpointErr);
+          // Continue to next endpoint or fallback
         }
-      } catch (apiErr) {
-        console.warn("Backend API call failed, presenting quota exhausted notification:", apiErr);
-        hitQuotaExceeded = true;
-        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
       }
 
-      // If quota was hit or real AI was not available, present the required quota notice
-      if (hitQuotaExceeded || !reportText) {
-        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
-        setReportType("quota");
-      } else {
+      if (isRealAiSuccess && reportText) {
         setReportType("real_ai");
+        setModelEngineInfo({
+          model: modelUsedName,
+          isDegraded: isDegradedModel,
+        });
+      } else {
+        // Fall back gracefully to the comprehensive Strategic Decision Model
+        // This ensures GitHub Pages or offline users NEVER face false quota exhaustion!
+        reportText = getBaselineDiagnosisReport(industry, size, trimmedIssue);
+        setReportType("strategic_engine");
+        setModelEngineInfo({
+          model: "策略人資總監實戰決策模型",
+          isDegraded: true,
+        });
       }
 
       setReportMarkdown(reportText);
@@ -405,10 +446,11 @@ export const AiRiskScreening: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Diagnosis error:", err);
-      // Even on unhandled error, show the clear quota/busy message as requested
-      setReportType("quota");
-      setReportMarkdown(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
-      const parsed = await marked.parse(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
+      // Fallback directly to strategic report on any unexpected runtime error
+      const fallbackReport = getBaselineDiagnosisReport(industry, size, trimmedIssue);
+      setReportType("strategic_engine");
+      setReportMarkdown(fallbackReport);
+      const parsed = await marked.parse(fallbackReport);
       setRenderedHtml(parsed);
     } finally {
       setIsLoading(false);
@@ -762,6 +804,14 @@ export const AiRiskScreening: React.FC = () => {
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                         <h3 className="text-amber-400 font-bold text-base">勞資戰略快篩提示</h3>
                       </>
+                    ) : reportType === "strategic_engine" ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                        <h3 className="text-white font-bold text-base">企業勞資戰略診斷報告</h3>
+                        <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded">
+                          策略人資總監模型
+                        </span>
+                      </>
                     ) : (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
@@ -770,7 +820,7 @@ export const AiRiskScreening: React.FC = () => {
                       </>
                     )}
 
-                    {reportType === "real_ai" && modelEngineInfo && (
+                    {(reportType === "real_ai" || reportType === "strategic_engine") && modelEngineInfo && (
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded border flex items-center ${
                           modelEngineInfo.isDegraded
@@ -784,7 +834,7 @@ export const AiRiskScreening: React.FC = () => {
                         }
                       >
                         <Cpu className="w-3 h-3 mr-1" />
-                        {modelEngineInfo.isDegraded ? "已自動降級為輕量模型" : "Gemini 深度引擎"}
+                        {modelEngineInfo.isDegraded ? (modelEngineInfo.model.includes("策略") ? "策略實戰決策模型" : "已自動降級為輕量模型") : "Gemini 深度引擎"}
                       </span>
                     )}
                   </div>

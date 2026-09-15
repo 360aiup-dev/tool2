@@ -177,13 +177,13 @@ ${trimmedIssue}`;
 請全程使用專業繁體中文 (台灣用語習慣)，展現頂尖策略顧問的高度與穿透力。`;
 
     // Standard Gemini models with progressive degradation (Cascade fallback)
-    // Primary balanced -> High-throughput Lite -> Proven 2.5 Flash -> Low-cost Lite
+    // High-throughput Lite (highest quota & speed) -> Proven 2.5 Flash -> Low-cost Lite -> Primary balanced
     const candidateModels = [
-      "gemini-3.8-flash",
       "gemini-3.1-flash-lite",
       "gemini-2.5-flash",
       "gemini-2.5-flash-lite",
       "gemini-flash-latest",
+      "gemini-3.8-flash",
     ];
 
     let modelUsed = "";

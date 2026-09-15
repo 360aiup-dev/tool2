@@ -37,9 +37,9 @@ export const TeamSection: React.FC = () => {
               {/* 3 Metrics / Value Pillars from Google site */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-center">
                 <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
-                  <div className="text-3xl font-black text-amber-400 mb-1">100+</div>
-                  <div className="text-sm font-bold text-white mb-1">經手爭議案例</div>
-                  <div className="text-slate-400 text-xs">累積豐富實戰化解經驗</div>
+                  <div className="text-3xl font-black text-amber-400 mb-1">6000家</div>
+                  <div className="text-sm font-bold text-white mb-1">企業勞動法務管理規劃</div>
+                  <div className="text-slate-400 text-xs">累積豐富實戰輔導經驗</div>
                 </div>
 
                 <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
@@ -50,7 +50,7 @@ export const TeamSection: React.FC = () => {
 
                 <div className="bg-slate-800/70 p-5 rounded-xl border border-slate-700/60">
                   <div className="text-3xl font-black text-amber-400 mb-1">專精</div>
-                  <div className="text-sm font-bold text-white mb-1">製造 / 服務 / 長照</div>
+                  <div className="text-sm font-bold text-white mb-1">勞動契約 / 薪資結構</div>
                   <div className="text-slate-400 text-xs">量身客製各產業落地方案</div>
                 </div>
               </div>

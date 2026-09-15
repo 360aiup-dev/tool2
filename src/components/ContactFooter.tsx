@@ -315,7 +315,7 @@ export const ContactFooter: React.FC = () => {
 
           <div className="pt-6 space-y-1.5">
             <p className="text-slate-400 text-sm">
-              &copy; 2026 凱爾亞力有限公司 資深勞資顧問團隊. All rights reserved.
+              &copy; 2026 企業勞資顧問團隊. All rights reserved.
             </p>
             <p className="text-slate-500 text-xs">
               本網站文案與分析僅供經營管理策略參考，不構成直接法律意見。
