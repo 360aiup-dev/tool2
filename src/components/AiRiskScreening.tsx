@@ -14,57 +14,16 @@ import {
 } from "lucide-react";
 import type { IndustryType, CompanySizeType } from "../types";
 
-export const DEFAULT_ISSUE = "員工經常遲到、想合法優化薪資結構、預防勞檢開罰";
+export const DEFAULT_ISSUE = "";
 
-export const DEFAULT_REPORT_MARKDOWN = `# 企業勞資戰略診斷報告
-
-### 1. 現況剖析與商業打擊
-在製造業，產線節奏與出勤率是「利潤的命脈」。員工頻繁遲到不僅是紀律問題，更直接導致：
-* **生產力損耗 (Productivity Leakage)：** 遲到會導致產線啟動延遲，產生「斷鏈」成本，若需支付加班費趕工，這是雙重利潤流失。
-* **管理成本放大：** 30人以下的中小企業，若主管將精力耗費在盯人與考勤糾紛，將嚴重排擠您處理核心業務、市場開發的時間。
-* **組織文化腐蝕：** 「劣幣驅逐良幣」，若遲到者未受制裁，高績效員工會產生心理不平衡，導致人才流失，進而拉低整體「人才密度」。
-* **薪資結構盲點：** 許多製造業將薪資混雜為「底薪」，導致加班費與資遣費基數過高。若結構未切割，您是在用高昂的成本支付低效率的勞務。
-
-### 2. 風險評級
-**高度風險**
-（遲到扣薪若未依規章處理，極易觸犯勞基法；薪資結構調整若未經合意，將面臨勞資爭議與勞檢風險。）
-
-### 3. 法律防火牆與違規裁罰清單
-
-| 法源依據 | 潛在違規行為 | 預估財務風險/罰鍰金額 |
-| :--- | :--- | :--- |
-| 勞基法第22條第2項 | 遲到直接扣全薪（未按比例計算） | 新台幣 2 萬 - 100 萬元 |
-| 勞基法第24條 | 薪資結構未切割導致加班費計算錯誤 | 補發工資 + 罰鍰 2 萬 - 100 萬元 |
-| 勞基法第70條 | 工作規則未報備即實施懲處 | 新台幣 2 萬 - 30 萬元 |
-
-### 4. 策略總監實戰方案 (Action Plan)
-
-**一、 建立「績效導向」的薪資結構切割 (Salary Restructuring)**
-* **實務做法：** 將薪資切割為「本薪」、「伙食津貼」、「職務加給」、「全勤獎金」。
-* **商業優勢：** 將遲到懲罰轉化為「獎勵機制」。遲到者失去的是「全勤獎金」，而非扣減「本薪」。這在法律上屬於獎金發放條件，爭議極低，且能有效降低加班費的計算基數。
-
-**二、 導入「工作規則」與「懲戒程序」的法定化**
-* **實務做法：** 制定並報備「工作規則」，明確定義遲到之認定標準（如：彈性工時區間、遲到累積計算方式）。將遲到納入「績效考核」指標，若累計遲到次數過多，可依據工作規則進行「警告、申誡」直至符合勞基法第12條的解僱要件。
-* **商業優勢：** 建立「法治化」的解僱防火牆，當您需要汰除績效不彰的員工時，有完整的紀錄與法規依據，避免資遣糾紛。
-
-**三、 導入數位化簽到退與自動化報表**
-* **實務做法：** 導入雲端打卡系統（如：WorkDo, 104考勤等），取代紙本簽到。
-* **商業優勢：** 將考勤透明化，消除人為模糊空間，並將數據連結至每月薪資結算，節省行政工時，確保數據可作為未來勞資爭議的法定證據。
-
-**四、 實施「績效面談與PIP (績效改善計畫)」**
-* **實務做法：** 針對遲到累犯者，不應只扣錢，應進行正式面談。要求其簽署「績效改善承諾書」，設定出勤改善目標。
-* **商業優勢：** 這顯示了雇主的「管理善意」，若員工仍不改善，未來進行懲戒或解僱時，您在勞資調解會上將佔據絕對優勢。
-
-### 5. 總監策略心法
-**「不要試圖用『扣薪』來管理員工，要用『結構』來篩選人才。」**
-在製造業，規章是您的盾牌，而結構化薪酬則是您的利潤保護傘。當您將出勤紀律與個人績效完全掛鉤時，那些無法配合的員工會自動離職，留下的，才是能為您創造產值的精銳。`;
+export const DEFAULT_REPORT_MARKDOWN = "";
 
 export const AiRiskScreening: React.FC = () => {
   const [industry, setIndustry] = useState<IndustryType>("製造業");
   const [size, setSize] = useState<CompanySizeType>("5-30人");
   const [issue, setIssue] = useState<string>(DEFAULT_ISSUE);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [reportMarkdown, setReportMarkdown] = useState<string>(DEFAULT_REPORT_MARKDOWN);
+  const [reportMarkdown, setReportMarkdown] = useState<string>("");
   const [renderedHtml, setRenderedHtml] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
@@ -77,8 +36,6 @@ export const AiRiskScreening: React.FC = () => {
   const resultContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let targetIssue = DEFAULT_ISSUE;
-    let targetReport = DEFAULT_REPORT_MARKDOWN;
     let targetIndustry: IndustryType = "製造業";
     let targetSize: CompanySizeType = "5-30人";
 
@@ -88,8 +45,23 @@ export const AiRiskScreening: React.FC = () => {
         const parsed = JSON.parse(saved);
         if (parsed.industry) targetIndustry = parsed.industry;
         if (parsed.size) targetSize = parsed.size;
-        if (parsed.issue) targetIssue = parsed.issue;
-        if (parsed.aiResult) targetReport = parsed.aiResult;
+        // Purge any stored issue or previous demo report so entering is strictly clean
+        let hasModified = false;
+        if (parsed.issue) {
+          delete parsed.issue;
+          hasModified = true;
+        }
+        if (parsed.aiResult) {
+          delete parsed.aiResult;
+          hasModified = true;
+        }
+        if (hasModified) {
+          try {
+            localStorage.setItem("last_diagnosis_data", JSON.stringify(parsed));
+          } catch (e) {
+            // ignore
+          }
+        }
       }
     } catch (e) {
       // ignore
@@ -97,13 +69,9 @@ export const AiRiskScreening: React.FC = () => {
 
     setIndustry(targetIndustry);
     setSize(targetSize);
-    setIssue(targetIssue);
-    const parsedResult = marked.parse(targetReport);
-    if (parsedResult instanceof Promise) {
-      parsedResult.then((html) => setRenderedHtml(html));
-    } else {
-      setRenderedHtml(parsedResult);
-    }
+    setIssue(""); // Always keep input area empty with no pre-filled text
+    setReportMarkdown("");
+    setRenderedHtml("");
   }, []);
 
   // Dynamically resolve backend API endpoints across GitHub Pages and Cloud Run
@@ -565,10 +533,9 @@ export const AiRiskScreening: React.FC = () => {
     <div class="info-grid">
       <div><strong>所屬行業：</strong>${industry}</div>
       <div><strong>公司規模：</strong>${size}</div>
-      <div class="info-full"><strong>管理痛點／疑問：</strong><br>${issue.replace(
-        /\n/g,
-        "<br>"
-      )}</div>
+      <div class="info-full"><strong>管理痛點／疑問：</strong><br>${(
+        issue.trim() || "（未指定具體管理痛點）"
+      ).replace(/\n/g, "<br>")}</div>
     </div>
   </div>
 
@@ -753,8 +720,8 @@ export const AiRiskScreening: React.FC = () => {
                   rows={4}
                   value={issue}
                   onChange={(e) => setIssue(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-amber-400 outline-none transition placeholder-slate-500 text-sm leading-relaxed"
-                  placeholder="例如：員工經常遲到、想合法優化薪資結構、不適任員工處置程序、工時與加班費計算爭議..."
+                  className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-amber-400 outline-none transition placeholder:text-slate-500 placeholder:italic text-sm leading-relaxed"
+                  placeholder="請在此輸入您的管理痛點或疑問（例：不適任員工處置、加班費計算爭議、考勤制度、薪資結構優化...）"
                 />
               </div>
 
@@ -797,15 +764,34 @@ export const AiRiskScreening: React.FC = () => {
             {!isLoading && !renderedHtml && (
               <div
                 id="result-placeholder"
-                className="m-auto text-slate-400 text-center py-12"
+                className="m-auto text-slate-400 text-center py-12 px-4 max-w-md"
               >
-                <Bot className="w-16 h-16 mx-auto mb-4 text-slate-600 opacity-60" />
-                <p className="text-base font-medium text-slate-300">
-                  分析結果將顯示於此
+                <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500 shadow-inner">
+                  <Bot className="w-8 h-8 text-amber-400/80" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-200 mb-2">
+                  企業勞資戰略診斷報告
+                </h3>
+                <p className="text-sm font-medium text-slate-300 mb-3">
+                  尚未產出診斷內容
                 </p>
-                <p className="text-xs text-slate-500 mt-2 max-w-xs mx-auto">
-                  請在左側選擇行業、規模並填寫所遇痛點，點擊「開始 AI 診斷」
+                <p className="text-xs text-slate-400 leading-relaxed mb-6">
+                  請於左側選擇行業、規模並輸入所遇管理痛點或勞資疑問，點擊「開始 AI 診斷」即可即時產出法規風險評估與行動對策。
                 </p>
+                <div className="grid grid-cols-3 gap-2.5 text-[11px] text-slate-400">
+                  <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <span className="block text-amber-400 font-semibold mb-0.5">即時快篩</span>
+                    <span className="text-slate-400">法規合規度</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <span className="block text-amber-400 font-semibold mb-0.5">裁罰清單</span>
+                    <span className="text-slate-400">預估財務風險</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800">
+                    <span className="block text-amber-400 font-semibold mb-0.5">實戰對策</span>
+                    <span className="text-slate-400">總監級行動方案</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -851,9 +837,11 @@ export const AiRiskScreening: React.FC = () => {
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                         <h3 className="text-white font-bold text-base">企業勞資戰略診斷報告</h3>
-                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">
-                          {modelEngineInfo ? "即時 AI 運算" : "策略總監示範範本"}
-                        </span>
+                        {modelEngineInfo && (
+                          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">
+                            即時 AI 運算
+                          </span>
+                        )}
                       </>
                     )}
 
@@ -1056,7 +1044,7 @@ export const AiRiskScreening: React.FC = () => {
                     <div className="sm:col-span-2 mt-1">
                       <strong>管理痛點／疑問：</strong>
                       <div className="mt-1 whitespace-pre-wrap text-slate-700">
-                        {issue}
+                        {issue.trim() || "（未指定具體管理痛點）"}
                       </div>
                     </div>
                   </div>
