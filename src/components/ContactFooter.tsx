@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCircle, Phone, Mail, Send, ShieldCheck, Copy, ExternalLink, Check } from "lucide-react";
+import { CheckCircle, Phone, Mail, Send, ShieldCheck } from "lucide-react";
 import type { ContactFormData } from "../types";
 
 export const ContactFooter: React.FC = () => {
@@ -12,8 +12,6 @@ export const ContactFooter: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
-  const [copied, setCopied] = useState<boolean>(false);
-  const [lastSubmitted, setLastSubmitted] = useState<any>(null);
 
   const TARGET_EMAIL = "360.aiup@gmail.com";
 
@@ -49,8 +47,6 @@ export const ContactFooter: React.FC = () => {
       issue: extraData.issue || "",
       aiResult: extraData.aiResult || "",
     };
-
-    setLastSubmitted(payload);
 
     try {
       // 1. Submit to server API which forwards to FormSubmit -> 360.aiup@gmail.com
@@ -95,49 +91,6 @@ export const ContactFooter: React.FC = () => {
     }
   };
 
-  const handleReset = () => {
-    setIsSubmitted(false);
-    setFormData({
-      company: "",
-      name: "",
-      phone: "",
-      email: "",
-    });
-  };
-
-  const mailSubject = encodeURIComponent(
-    `【高層預約】${lastSubmitted?.company || formData.company || "企業客戶"} - 策略診斷請求`
-  );
-  const mailBody = encodeURIComponent(
-    `頭家神隊友顧問團隊（許顧問）您好：\n\n` +
-    `我們已於官網提交勞資戰略預約諮詢，詳細資訊如下：\n\n` +
-    `■ 公司名稱：${lastSubmitted?.company || formData.company}\n` +
-    `■ 聯絡人姓名／職稱：${lastSubmitted?.name || formData.name}\n` +
-    `■ 聯絡電話：${lastSubmitted?.phone || formData.phone}\n` +
-    `■ 電子信箱：${lastSubmitted?.email || formData.email}\n` +
-    `■ 產業別：${lastSubmitted?.industry || "未指定"}\n` +
-    `■ 公司規模：${lastSubmitted?.size || "未指定"}\n` +
-    `■ 諮詢痛點／問題：${lastSubmitted?.issue || "一般勞資法規諮詢"}\n\n` +
-    `請收件後儘速與我們聯繫，感謝！`
-  );
-  const mailtoUrl = `mailto:${TARGET_EMAIL}?subject=${mailSubject}&body=${mailBody}`;
-
-  const handleCopySummary = () => {
-    const text =
-      `【高層預約諮詢摘要】\n` +
-      `公司名稱：${lastSubmitted?.company || formData.company}\n` +
-      `聯絡人：${lastSubmitted?.name || formData.name}\n` +
-      `聯絡電話：${lastSubmitted?.phone || formData.phone}\n` +
-      `電子信箱：${lastSubmitted?.email || formData.email}\n` +
-      `產業別：${lastSubmitted?.industry || "未指定"}\n` +
-      `公司規模：${lastSubmitted?.size || "未指定"}\n` +
-      `諮詢事由：${lastSubmitted?.issue || "勞資戰略診斷"}\n` +
-      `指定送達：${TARGET_EMAIL}`;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
-
   return (
     <footer id="contact" className="bg-slate-950 py-24 relative overflow-hidden">
       {/* Background radial highlight */}
@@ -164,53 +117,17 @@ export const ContactFooter: React.FC = () => {
               id="contact-success"
               className="absolute inset-0 bg-white z-20 flex flex-col items-center justify-center text-center p-6 sm:p-8 animate-fade-in"
             >
-              <CheckCircle className="w-16 h-16 text-emerald-500 mb-2" />
-              <h3 className="text-2xl font-bold text-slate-900 mb-1">預約成功！</h3>
+              <CheckCircle className="w-16 h-16 text-emerald-500 mb-3" />
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">預約成功！</h3>
               
-              <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900 mb-4 inline-flex items-center">
-                <Mail className="w-3.5 h-3.5 mr-1.5 text-amber-600 shrink-0" />
+              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs sm:text-sm text-amber-900 mb-4 inline-flex items-center">
+                <Mail className="w-4 h-4 mr-2 text-amber-600 shrink-0" />
                 <span>系統已發送信件至指定信箱：<strong>{TARGET_EMAIL}</strong></span>
               </div>
 
-              <p className="text-slate-600 text-xs sm:text-sm mb-4 leading-relaxed max-w-xs">
-                感謝您的填寫，顧問將於 48 小時內與您聯繫。為確保 100% 收到，您亦可點擊下方按鈕直接由您的信箱發送備份信：
+              <p className="text-slate-700 text-sm sm:text-base font-medium leading-relaxed max-w-sm">
+                顧問收到預約後會盡快與您連絡！感謝您的預約。
               </p>
-
-              <div className="w-full space-y-2.5 mb-4">
-                <a
-                  href={mailtoUrl}
-                  className="w-full inline-flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-4 rounded-lg shadow transition text-sm"
-                >
-                  <ExternalLink className="w-4 h-4 mr-1.5" />
-                  點此開啟信箱寄信至 {TARGET_EMAIL}
-                </a>
-
-                <button
-                  type="button"
-                  onClick={handleCopySummary}
-                  className="w-full inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-lg transition text-xs"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-                      已複製預約資料至剪貼簿！
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 mr-1" />
-                      複製預約資料摘要 (可傳至 Line)
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleReset}
-                className="text-slate-500 hover:text-slate-800 text-xs font-medium underline"
-              >
-                再填寫一筆預約
-              </button>
             </div>
           )}
 
@@ -301,7 +218,7 @@ export const ContactFooter: React.FC = () => {
             <div className="flex items-center space-x-2 text-lg sm:text-xl font-bold tracking-wide text-white">
               <Phone className="w-5 h-5 text-amber-500" />
               <a href="tel:0923869696" className="hover:text-amber-400 transition">
-                諮詢專線：0923-869696 許顧問
+                諮詢專線：0923-869696 Sandy顧問
               </a>
             </div>
             <div className="hidden sm:block text-slate-600">|</div>
@@ -315,7 +232,7 @@ export const ContactFooter: React.FC = () => {
 
           <div className="pt-6 space-y-1.5">
             <p className="text-slate-400 text-sm">
-              &copy; 2026 企業勞資顧問團隊. All rights reserved.
+              &copy; 2026 企業軍師Sandy企業勞資顧問團隊. All rights reserved.
             </p>
             <p className="text-slate-500 text-xs">
               本網站文案與分析僅供經營管理策略參考，不構成直接法律意見。

@@ -3,7 +3,6 @@ import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { AiRiskScreening } from "./components/AiRiskScreening";
 import { ThemeSections } from "./components/ThemeSections";
-import { TeamSection } from "./components/TeamSection";
 import { ContactFooter } from "./components/ContactFooter";
 
 export default function App() {
@@ -14,7 +13,6 @@ export default function App() {
         <Hero />
         <AiRiskScreening />
         <ThemeSections />
-        <TeamSection />
       </main>
       <ContactFooter />
     </div>

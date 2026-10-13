@@ -30,11 +30,11 @@ export const ThemeSections: React.FC = () => {
           </div>
 
           <div className="w-full lg:w-1/2">
-            <div className="flex items-center mb-4">
-              <span className="bg-slate-100 text-slate-800 px-3 py-1 rounded text-sm font-semibold mr-3 border border-slate-200">
+            <div className="flex items-center mb-5">
+              <span className="bg-amber-100 text-amber-950 px-4 py-2 rounded-lg text-lg sm:text-xl font-extrabold mr-4 border border-amber-300 shadow-sm inline-flex items-center">
                 主題一：人才留任
               </span>
-              <div className="h-px bg-slate-300 flex-grow"></div>
+              <div className="h-0.5 bg-slate-200 flex-grow"></div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
               加薪也留不住人？<br className="hidden sm:inline" />
@@ -67,7 +67,7 @@ export const ThemeSections: React.FC = () => {
               </ul>
             </div>
 
-            <div className="bg-amber-50/80 border border-amber-200/80 rounded-lg p-4 text-amber-900 text-sm font-medium italic">
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-lg p-4 text-amber-900 text-base font-medium italic">
               「別讓無效的加薪，變成養懶人的溫床。」
             </div>
           </div>
@@ -101,11 +101,11 @@ export const ThemeSections: React.FC = () => {
           </div>
 
           <div className="w-full lg:w-1/2">
-            <div className="flex items-center mb-4">
-              <span className="bg-slate-800 text-amber-400 px-3 py-1 rounded text-sm font-semibold mr-3 border border-slate-700">
+            <div className="flex items-center mb-5">
+              <span className="bg-amber-500/20 text-amber-300 px-4 py-2 rounded-lg text-lg sm:text-xl font-extrabold mr-4 border border-amber-500/40 shadow-sm inline-flex items-center">
                 主題二：風險防禦
               </span>
-              <div className="h-px bg-slate-700 flex-grow"></div>
+              <div className="h-0.5 bg-slate-700 flex-grow"></div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-shadow-lg text-white tracking-tight">
               勞檢與訴訟不是機率問題<br />
@@ -138,24 +138,25 @@ export const ThemeSections: React.FC = () => {
               </ul>
             </div>
 
-            <div className="bg-slate-800/70 border border-slate-700 rounded-lg p-4 text-amber-300 text-sm font-medium italic">
+            <div className="bg-slate-800/70 border border-slate-700 rounded-lg p-4 text-amber-300 text-base font-medium italic">
               「一份完善的契約，比請律師打官司更便宜。」
             </div>
           </div>
         </div>
       </section>
 
-      {/* 主題三：管理升級 */}
       <section id="management" className="py-24 bg-slate-50 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-amber-600 font-bold tracking-wider uppercase text-sm">
-            主題三：管理升級
-          </span>
+          <div className="inline-flex items-center justify-center mb-5">
+            <span className="bg-amber-100 text-amber-950 px-4 py-2 rounded-lg text-lg sm:text-xl font-extrabold border border-amber-300 shadow-sm inline-flex items-center">
+              主題三：管理升級
+            </span>
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4 tracking-tight">
             AI 時代與彈性工時，您的管理跟上法規了嗎？
           </h2>
           <p className="text-slate-600 text-base sm:text-lg mb-14 max-w-3xl mx-auto">
-            LINE交辦工作算加班嗎？導入AI如何合法資遣？模糊地帶正是勞資糾紛的溫床。
+            LINE交辦工作算加班嗎？導入AI如何合法調動與轉型？ 模糊地帶正是勞資糾紛的溫床。
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-left">

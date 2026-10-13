@@ -99,18 +99,20 @@ function isQuotaExhaustedError(err: any): boolean {
   );
 }
 
-const QUOTA_EXHAUSTED_MESSAGE = `# ⚠️ 今日AI額度已使用完畢...
+const QUOTA_EXHAUSTED_MESSAGE = `# ⚠️ 今日 AI 運算額度已用完
 
-抱歉，由於目前系統線上諮詢量踴躍，**今日AI額度已使用完畢...**
+抱歉，目前系統 AI 算力額度已達上限，暫無法為您進行即時診斷分析與回答問題。
 
-系統目前暫時無法為您的自訂情境進行即時全新 AI 運算分析。
+### 請洽網站管理者：
+若您需要進行企業勞資風險診斷或有即時法務諮詢需求，請直接洽詢網站管理者：
 
-### 建議您採取以下方案：
-1. **體驗固定快選範例**：您可以點選上方「常見情境快速填入」的固定快選按鈕（如：出勤與加班、薪資結構優化、不適任員工退場、業務離職帶走客戶等），立即查看由策略人資總監親自精編的完整法規防火牆與戰略實戰示範報告。
-2. **預約策略人資顧問深度諮詢**：若您目前正面臨急迫之勞資爭議、員工檢舉、大量資遣、高額求償或營業秘密外洩，建議直接聯繫頭家神隊友顧問團隊進行一對一深度對談：
-   - **顧問專線**：0923-869696 許顧問
-   - **官方 LINE 預約**：[https://lin.ee/udQp9wm](https://lin.ee/udQp9wm)
-   - **聯絡 Email**：360.aiup@gmail.com`;
+- **網站管理者信箱**：360.aiup@gmail.com
+- **諮詢專線**：0923-869696 Sandy顧問
+- **官方 LINE 諮詢**：[點此加入 LINE 諮詢](https://lin.ee/udQp9wm)
+
+---
+
+💡 **您亦可直接於本頁面下方「預約深度諮詢」填寫表單，管理者與顧問團隊收到後將盡快主動與您聯絡！**`;
 
 // AI Diagnostic endpoint
 app.post("/api/diagnose", async (req, res) => {
@@ -150,7 +152,7 @@ app.post("/api/diagnose", async (req, res) => {
 - 實際遭遇的管理痛點與情境：
 ${trimmedIssue}`;
 
-    const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監 (Strategic HR Director / HRBP)」及資深勞動法令顧問。
+    const systemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監」及資深勞動法令顧問。
 你的對話對象是企業主、創辦人或經營決策階層。你擅長跳脫傳統人資行政思維，將「勞動法規遵循」轉化為企業的「商業競爭力」、「護城河」與「人才密度策略」。
 
 【極其重要的輸入真實性與相關性檢驗】：
@@ -323,7 +325,7 @@ app.post("/api/contact", async (req, res) => {
       success: true,
       emailSent,
       targetEmail: "360.aiup@gmail.com",
-      message: "預約資料已送出！頭家神隊友顧問團隊將在 1 個工作天內主動與您聯繫。",
+      message: "預約資料已送出！顧問團隊將在 1 個工作天內主動與您聯繫。",
       leadId: newLead.id,
     });
   } catch (err: any) {

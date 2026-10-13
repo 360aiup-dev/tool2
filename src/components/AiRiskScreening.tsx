@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { marked } from "marked";
 import {
   Sparkles,
@@ -6,28 +6,105 @@ import {
   Printer,
   Bot,
   AlertTriangle,
-  Lightbulb,
   Check,
   Cpu,
   RefreshCw,
+  X,
+  ExternalLink,
 } from "lucide-react";
 import type { IndustryType, CompanySizeType } from "../types";
+
+export const DEFAULT_ISSUE = "員工經常遲到、想合法優化薪資結構、預防勞檢開罰";
+
+export const DEFAULT_REPORT_MARKDOWN = `# 企業勞資戰略診斷報告
+
+### 1. 現況剖析與商業打擊
+在製造業，產線節奏與出勤率是「利潤的命脈」。員工頻繁遲到不僅是紀律問題，更直接導致：
+* **生產力損耗 (Productivity Leakage)：** 遲到會導致產線啟動延遲，產生「斷鏈」成本，若需支付加班費趕工，這是雙重利潤流失。
+* **管理成本放大：** 30人以下的中小企業，若主管將精力耗費在盯人與考勤糾紛，將嚴重排擠您處理核心業務、市場開發的時間。
+* **組織文化腐蝕：** 「劣幣驅逐良幣」，若遲到者未受制裁，高績效員工會產生心理不平衡，導致人才流失，進而拉低整體「人才密度」。
+* **薪資結構盲點：** 許多製造業將薪資混雜為「底薪」，導致加班費與資遣費基數過高。若結構未切割，您是在用高昂的成本支付低效率的勞務。
+
+### 2. 風險評級
+**高度風險**
+（遲到扣薪若未依規章處理，極易觸犯勞基法；薪資結構調整若未經合意，將面臨勞資爭議與勞檢風險。）
+
+### 3. 法律防火牆與違規裁罰清單
+
+| 法源依據 | 潛在違規行為 | 預估財務風險/罰鍰金額 |
+| :--- | :--- | :--- |
+| 勞基法第22條第2項 | 遲到直接扣全薪（未按比例計算） | 新台幣 2 萬 - 100 萬元 |
+| 勞基法第24條 | 薪資結構未切割導致加班費計算錯誤 | 補發工資 + 罰鍰 2 萬 - 100 萬元 |
+| 勞基法第70條 | 工作規則未報備即實施懲處 | 新台幣 2 萬 - 30 萬元 |
+
+### 4. 策略總監實戰方案 (Action Plan)
+
+**一、 建立「績效導向」的薪資結構切割 (Salary Restructuring)**
+* **實務做法：** 將薪資切割為「本薪」、「伙食津貼」、「職務加給」、「全勤獎金」。
+* **商業優勢：** 將遲到懲罰轉化為「獎勵機制」。遲到者失去的是「全勤獎金」，而非扣減「本薪」。這在法律上屬於獎金發放條件，爭議極低，且能有效降低加班費的計算基數。
+
+**二、 導入「工作規則」與「懲戒程序」的法定化**
+* **實務做法：** 制定並報備「工作規則」，明確定義遲到之認定標準（如：彈性工時區間、遲到累積計算方式）。將遲到納入「績效考核」指標，若累計遲到次數過多，可依據工作規則進行「警告、申誡」直至符合勞基法第12條的解僱要件。
+* **商業優勢：** 建立「法治化」的解僱防火牆，當您需要汰除績效不彰的員工時，有完整的紀錄與法規依據，避免資遣糾紛。
+
+**三、 導入數位化簽到退與自動化報表**
+* **實務做法：** 導入雲端打卡系統（如：WorkDo, 104考勤等），取代紙本簽到。
+* **商業優勢：** 將考勤透明化，消除人為模糊空間，並將數據連結至每月薪資結算，節省行政工時，確保數據可作為未來勞資爭議的法定證據。
+
+**四、 實施「績效面談與PIP (績效改善計畫)」**
+* **實務做法：** 針對遲到累犯者，不應只扣錢，應進行正式面談。要求其簽署「績效改善承諾書」，設定出勤改善目標。
+* **商業優勢：** 這顯示了雇主的「管理善意」，若員工仍不改善，未來進行懲戒或解僱時，您在勞資調解會上將佔據絕對優勢。
+
+### 5. 總監策略心法
+**「不要試圖用『扣薪』來管理員工，要用『結構』來篩選人才。」**
+在製造業，規章是您的盾牌，而結構化薪酬則是您的利潤保護傘。當您將出勤紀律與個人績效完全掛鉤時，那些無法配合的員工會自動離職，留下的，才是能為您創造產值的精銳。`;
 
 export const AiRiskScreening: React.FC = () => {
   const [industry, setIndustry] = useState<IndustryType>("製造業");
   const [size, setSize] = useState<CompanySizeType>("5-30人");
-  const [issue, setIssue] = useState<string>("");
+  const [issue, setIssue] = useState<string>(DEFAULT_ISSUE);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [reportMarkdown, setReportMarkdown] = useState<string>("");
+  const [reportMarkdown, setReportMarkdown] = useState<string>(DEFAULT_REPORT_MARKDOWN);
   const [renderedHtml, setRenderedHtml] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
+  const [showPrintModal, setShowPrintModal] = useState<boolean>(false);
   const [reportType, setReportType] = useState<
-    "preset" | "real_ai" | "quota" | "guidance" | "strategic_engine"
+    "real_ai" | "quota" | "guidance"
   >("real_ai");
   const [modelEngineInfo, setModelEngineInfo] = useState<{ model: string; isDegraded: boolean } | null>(null);
 
   const resultContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let targetIssue = DEFAULT_ISSUE;
+    let targetReport = DEFAULT_REPORT_MARKDOWN;
+    let targetIndustry: IndustryType = "製造業";
+    let targetSize: CompanySizeType = "5-30人";
+
+    try {
+      const saved = localStorage.getItem("last_diagnosis_data");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.industry) targetIndustry = parsed.industry;
+        if (parsed.size) targetSize = parsed.size;
+        if (parsed.issue) targetIssue = parsed.issue;
+        if (parsed.aiResult) targetReport = parsed.aiResult;
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    setIndustry(targetIndustry);
+    setSize(targetSize);
+    setIssue(targetIssue);
+    const parsedResult = marked.parse(targetReport);
+    if (parsedResult instanceof Promise) {
+      parsedResult.then((html) => setRenderedHtml(html));
+    } else {
+      setRenderedHtml(parsedResult);
+    }
+  }, []);
 
   // Dynamically resolve backend API endpoints across GitHub Pages and Cloud Run
   const getCandidateApiUrls = (path: string): string[] => {
@@ -60,42 +137,20 @@ export const AiRiskScreening: React.FC = () => {
     return Array.from(new Set(urls));
   };
 
-  // Quick Preset Issue Templates
-  const presets = [
-    {
-      title: "出勤與加班",
-      text: "員工下班後經常在 Line 詢問工作或回覆訊息，想知道如何合法規範出勤紀錄與加班費計算，避免被勞檢認定隱形加班違規裁罰？",
-    },
-    {
-      title: "薪資結構優化",
-      text: "基本工資逐年調漲，目前給員工全薪45,000元，希望合法拆分經常性與非經常性項目（如津貼、伙食費、績效獎金），降低勞健保負擔與加班費基數？",
-    },
-    {
-      title: "不適任員工退場",
-      text: "有位員工試用期過後工作態度消極、常遲到且工作錯誤率高，多次口頭勸導無效，公司該如何落實合法輔導SOP與資遣程序？",
-    },
-    {
-      title: "醫療/輪班排班",
-      text: "單位涉及輪班與值班，排班表常超出正常工時，如何合法實施變形工時、簽署同意書並召開勞資會議？",
-    },
-    {
-      title: "業務離職帶走客戶",
-      text: "業務主管離職跳槽到競爭對手，私下透過通訊軟體帶走核心客戶名單與重要報價資訊，公司如何透過競業禁止與營業秘密法維護權益？",
-    },
-  ];
+  const QUOTA_EXHAUSTED_CLIENT_MESSAGE = `# ⚠️ 今日 AI 運算額度已用完
 
-  const QUOTA_EXHAUSTED_CLIENT_MESSAGE = `# ⚠️ 今日AI額度已使用完畢...
+抱歉，目前系統 AI 算力額度已達上限，暫無法為您進行即時診斷分析與回答問題。
 
-抱歉，由於目前系統線上諮詢量踴躍，**今日AI額度已使用完畢...**
+### 請洽網站管理者：
+若您需要進行企業勞資風險診斷或有即時法務諮詢需求，請直接洽詢網站管理者：
 
-系統目前暫時無法為您的自訂情境進行即時全新 AI 運算分析。
+- **網站管理者信箱**：360.aiup@gmail.com
+- **諮詢專線**：0923-869696 Sandy顧問
+- **官方 LINE 諮詢**：[點此加入 LINE 諮詢](https://lin.ee/udQp9wm)
 
-### 建議您採取以下方案：
-1. **體驗固定快選範例**：您可以點選左側「常見情境快速填入」的固定快選按鈕（如：出勤與加班、薪資結構優化、不適任員工退場、業務離職帶走客戶等），立即查閱由策略人資總監親自精編的完整法規防火牆與戰略實戰示範報告。
-2. **預約策略人資顧問深度諮詢**：若您目前正面臨急迫之勞資爭議、員工檢舉、大量資遣、高額求償或營業秘密外洩，建議直接聯繫頭家神隊友顧問團隊進行一對一深度對談：
-   - **顧問專線**：0923-869696 許顧問
-   - **官方 LINE 預約**：[https://lin.ee/udQp9wm](https://lin.ee/udQp9wm)
-   - **聯絡 Email**：360.aiup@gmail.com`;
+---
+
+💡 **您亦可直接於本頁面下方「預約深度諮詢」填寫表單，管理者與顧問團隊收到後將盡快主動與您聯絡！**`;
 
   const isIrrelevantIssue = (iss: string): boolean => {
     const trimmed = iss.trim();
@@ -115,12 +170,7 @@ export const AiRiskScreening: React.FC = () => {
     return irrelevantPatterns.some((p) => p.test(normalized));
   };
 
-  const getBaselineDiagnosisReport = (ind: string, sz: string, iss: string) => {
-    const text = iss.toLowerCase();
-
-    // Check for irrelevant non-HR inputs (e.g. "肚子餓")
-    if (isIrrelevantIssue(iss)) {
-      return `# ⚠️ 勞資戰略快篩提示
+  const IRRELEVANT_GUIDANCE_MESSAGE = (iss: string) => `# ⚠️ 勞資戰略快篩提示
 
 您輸入的內容（「${iss}」）並非企業經營管理、勞動法令或人力資源之相關情境。
 
@@ -132,168 +182,6 @@ export const AiRiskScreening: React.FC = () => {
 5. **勞檢與爭議處理**：勞工局勞動檢查應對、勞資爭議調解、職場霸凌與性騷擾防治
 
 👉 **請在上方輸入框具體描述您目前面臨的團隊或制度痛點**（例如：「員工試用期表現不佳想請他離開，如何避免違法資遣？」或「業務主管離職跳槽競品並私下挖角團隊」），策略人資總監將為您進行深入的法律防火牆檢視與落地方案。`;
-    }
-
-    // Scenario 1: Trade secrets, customer poaching, non-compete
-    if (
-      text.includes("秘密") ||
-      text.includes("客戶") ||
-      text.includes("競業") ||
-      text.includes("跳槽") ||
-      text.includes("挖角") ||
-      text.includes("帶走") ||
-      text.includes("外洩")
-    ) {
-      return `# 企業勞資戰略診斷報告
-
-### 1. 現況剖析與商業打擊
-貴司（${ind}，規模約 ${sz}）所遇情境：「${iss.slice(0, 50)}...」
-這絕非單純的人事流動，而是**「企業核心商業資產的非法掠奪」**。
-- **利潤與營運衝擊**：客戶名單與核心機密外洩，將直接導致既有合約遭競品低價狙擊，客戶獲取成本 (CAC) 成倍翻升。若團隊關鍵技術人員遭成批挖角，更將導致服務鏈中斷，直接侵蝕企業核心毛利。
-- **管理漏洞盲點**：多數中小企業誤以為簽署一般僱傭合約即具防禦力，實務上常因「未落實合理保密措施」或「競業禁止未依法提供合理補償」，導致訴訟時在法庭上遭法官全盤宣告無效。
-
-### 2. 風險評級
-**極高風險 (Critical)**
-
-### 3. 法律防火牆與違規/求償清單
-
-| 法源依據 | 侵害或違法樣態 | 預估財務損害 / 法律責任追訴 |
-| :--- | :--- | :--- |
-| **營業秘密法第10條、第12條、第13條之1** | 未經授權複製、帶走客戶名單、報價參數或技術配方 | 民事最高3倍懲罰性賠償金；刑事處 5 年以下有期徒刑或併科 NT$ 100萬 ～ 5,000萬元罰金 |
-| **勞動基準法第9條之1 (競業禁止四要件)** | 離職競業禁止未給付每月至少半薪之合理補償費 | 條款自始無效，公司無權限制員工跳槽，已投入之防禦成本全盤落空 |
-| **民法第184條、第544條及刑法第342條** | 受任人違背任務致公司受損害 (背信罪) | 追訴背信罪刑責，並得依法假扣押其名下財產追索損害賠償 |
-
-### 4. 策略總監實戰方案 (Action Plan)
-- **第一時間保全電子證據鏈 (Forensic)**：立即盤查其公用筆電、企業信箱及雲端空間之最後存取/轉寄紀錄，進行數位鑑識存證，為日後假處分做足準備。
-- **寄發正式存證信函與律師警告函**：同步發函給該離職員工與新任競品公司，正式主張著作權與營業秘密權益，啟動法律威嚇阻斷對手繼續接收被竊資料。
-- **升級機密資訊分級與權限控管 (ACL)**：對公司既有客戶資料庫實施「權限分級」與「下載浮水印」，在法律層面補強「合理保密措施」之法定抗辯要件。
-- **重新檢視競業禁止與補償條款**：針對高階與關鍵職位，嚴格按勞基法施行細則重簽附帶合法補償金之保密競業契約，築起牢不可破的制度護城河。
-
-### 5. 總監策略心法
-**「營業秘密的防禦，贏在事前權限隔離，而非事後法庭叫屈。」** 當制度具備實質威懾力，野心者才不敢拿公司的命脈作為個人投名的籌碼。
-
-*提示：請務必諮詢勞動法與智慧財產權專業顧問以確保合規*`;
-    }
-
-    // Scenario 2: Termination, layoff, PIP, probation, severance
-    if (
-      text.includes("資遣") ||
-      text.includes("解僱") ||
-      text.includes("開除") ||
-      text.includes("不適任") ||
-      text.includes("試用期") ||
-      text.includes("退場") ||
-      text.includes("淘汰") ||
-      text.includes("自願離職")
-    ) {
-      return `# 企業勞資戰略診斷報告
-
-### 1. 現況剖析與商業打擊
-貴司（${ind}，規模約 ${sz}）所遇情境：「${iss.slice(0, 50)}...」
-處理不適任員工退場，是企業經營者最耗心力、也最容易踩雷的關卡。
-- **營運與財務傷害**：一旦退場程序產生瑕疵，遭員工提起「確認僱傭關係存在」訴訟，官司動輒纏訟 1～3 年。敗訴時雇主須**全額補發爭訟期間工資加計年息 5%**，並強制復職，財務打擊動輒百萬起跳。
-- **組織文化侵蝕**：留下不適任員工會拖垮高效同仁產能；但若「粗暴開除」則引發全員自危，破壞組織的人才密度與信任基礎。
-
-### 2. 風險評級
-**高度風險**
-
-### 3. 法律防火牆與違法裁罰清單
-
-| 法源依據 | 潛在違規行為 | 預估財務風險/罰鍰 |
-| :--- | :--- | :--- |
-| **勞基法第11條第5款、最高法院判決** | 未落實「解僱最後手段性原則」即逕行終止契約 | 判決解僱無效，補發爭訟全期工資 (通常 NT$ 60萬 ～ 150萬以上) 且須復職 |
-| **勞基法第12條第1項第4款及第2項** | 懲戒解僱逾越 30 日法定知悉除斥期間 | 解僱無效，轉為違法終止，面臨重額補發工資訴求 |
-| **就業服務法第33條第1項** | 資遣員工未於離職 10 日前向主管機關辦理資遣通報 | 依就服法第68條第1項，處 NT$ 3萬 ～ 15萬元罰鍰 |
-| **勞基法第16條、第17條 / 勞工退休金條例第12條** | 未依法給付預告工資或資遣費 | 處 NT$ 30萬 ～ 150萬元罰鍰，並限期給付 |
-
-### 4. 策略總監實戰方案 (Action Plan)
-- **實施標準化績效改善計畫 (PIP)**：建立至少 30～60 天之 PIP，明確定義改善目標、輔導紀錄、雙方簽名週會面談，完備合規舉證最後手段性。
-- **善用合意終止協議 (Mutual Separation Agreement)**：以「離職金協議 (Severance Package)」換取勞工自願簽署保密與拋棄爭議權利條款，斬斷一切訴訟後患。
-- **嚴守 10 日資遣通報與法定預告日程**：確保人資系統在預告期與資遣通報時程上零瑕疵，防杜勞工局開罰。
-- **重新檢視試用期考核標準**：試用期雖具契約彈性，退場仍須符合具體客觀之職能考核記錄，杜絕無由終止爭議。
-
-### 5. 總監策略心法
-**「好人才需要尊重，不適任人才需要流程。」** 透過制度化留痕與善意溝通，才能兼顧法規防禦與企業管理尊嚴。
-
-*提示：請務必諮詢當地勞動法律顧問以確保合規*`;
-    }
-
-    // Scenario 3: Overtime, attendance, Line messages off-hours, scheduling
-    if (
-      text.includes("加班") ||
-      text.includes("排班") ||
-      text.includes("調班") ||
-      text.includes("打卡") ||
-      text.includes("出勤") ||
-      text.includes("工時") ||
-      text.includes("超時") ||
-      text.includes("line") ||
-      text.includes("休假") ||
-      text.includes("請假")
-    ) {
-      return `# 企業勞資戰略診斷報告
-
-### 1. 現況剖析與商業打擊
-貴司（${ind}，規模約 ${sz}）所遇情境：「${iss.slice(0, 50)}...」
-出勤紀錄與排班混亂，是台灣勞檢處開罰率最高的頭號地雷。
-- **營運利潤侵蝕**：排班若與打卡記錄脫鉤，會引發「加班費隱形膨脹」或「漏給加班費」之連鎖追討風險，離職員工可回溯追索 5 年差額。
-- **隱形加班陷阱**：主管下班後以通訊軟體交辦事項，若無「加班事前申請與離線原則規範」，在司法與勞檢實務上一律依通訊時間推定為加班工時。
-
-### 2. 風險評級
-**高度風險**
-
-### 3. 法律防火牆與違規裁罰清單
-
-| 法源依據 | 潛在違規行為 | 預估財務風險/罰鍰 |
-| :--- | :--- | :--- |
-| **勞基法第30條第5項、第6項** | 未備置出勤紀錄，或記錄未詳實載至分鐘 (如僅勾選打勾) | 依勞基法第79條第2項，處 NT$ 9萬 ～ 45萬元罰鍰 |
-| **勞基法第24條、第39條** | 未依法加乘發給平日加班費 (1.34/1.67倍) 或國定假日加倍發給工資 | 處 NT$ 2萬 ～ 100萬元罰鍰，並公布企業名稱與負責人姓名 |
-| **勞基法第32條第2項** | 延長工時每日超過 12 小時或每月超逾 46 小時上限 | 處 NT$ 2萬 ～ 100萬元罰鍰 |
-| **勞基法第36條** | 勞工每 7 日中未有 1 日例假、1 日休息日 (違反一例一休) | 處 NT$ 2萬 ～ 100萬元罰鍰 |
-
-### 4. 策略總監實戰方案 (Action Plan)
-- **導入合法工時制度 (變形工時調移)**：依產業特性依法召開勞資會議通過二週、四週或八週變形工時，將工時排程合法彈性化，省下高額無謂加班費。
-- **訂立「離線權」與「通訊軟體交辦守則」**：明訂下班後非緊急事項不回覆原則，若確有緊急交辦，落實事後「分鐘級補登打卡」審批，消除隱形勞檢地雷。
-- **全面升級雲端 GPS/數位打卡系統**：廢除紙本紀錄，確保出勤、請假與薪資系統自動連動，確保帳表一致。
-- **定期召開每季勞資會議並報備備查**：健全勞資會議機制，使加班、輪班換班間隔等法定彈性具備堅不可摧的程序正義。
-
-### 5. 總監策略心法
-**「在出勤紀錄上省麻煩，就是給勞檢員與離職員工送上空白支票。」** 嚴格的數位打卡紀錄是保護雇主最根本的法律盾牌。
-
-*提示：請務必諮詢當地勞動法律顧問以確保合規*`;
-    }
-
-    // Default: Professional Strategic HRBP Assessment
-    return `# 企業勞資戰略診斷報告
-
-### 1. 現況剖析與管理評估
-貴司（${ind}，規模約 ${sz}）所諮詢情境：「${iss.slice(0, 50)}...」
-在企業組織管理與勞動法規實務中，此類情境需特別釐清**「契約約定範圍」、「管理指揮權界限」與「法定程序完備度」**。
-- **經營與管理影響**：若缺乏清晰的內部書面約定或標準作業程序（SOP），往往在團隊內部發生認知分歧時演變為勞資對立，甚至可能衍生非預期的調解或行政爭議。
-- **合規管理盲點**：部分企業常仰賴口頭默契或慣例處理，但在勞動檢查或司法實務上，主管機關多採「書面證據原則」與「有利勞工推定原則」，事前制度化留痕方為防禦根本。
-
-### 2. 風險評級
-**中度至高度風險 (視書面舉證完整度而定)**
-
-### 3. 法律防火牆與法規檢視重點
-
-| 法源依據 | 實務檢視重點 | 潛在爭議與法律責任 |
-| :--- | :--- | :--- |
-| **勞基法第70條 / 工作規則** | 內部規章是否報主管機關核備並公開揭示 | 罰鍰 NT$ 2萬 ～ 30萬元，未公開揭示者條款效力恐受爭執 |
-| **勞基法第22條 / 工資全額給付原則** | 是否有因違規私自扣薪或未全額給付情形 | 罰鍰 NT$ 9萬 ～ 45萬元，並令限期給付差額工資 |
-| **勞動事件法第37條 / 舉證責任倒置** | 公司是否備妥出勤、工資、輔導或面談之書面留痕 | 勞動法庭上雇主負實質舉證之責，無留痕將面臨舉證不利益 |
-
-### 4. 策略總監實戰方案 (Action Plan)
-- **盤點合約條款與管理留痕**：檢視現行勞動契約與相關規章，確保雙方權利義務具備書面合意與清楚界定。
-- **建立標準化溝通與簽核流程**：將口頭管理升級為具有法律效力的表單、會議紀錄或定期考核，確保程序正義。
-- **定期召開勞資會議**：透過合法勞資會議形成決議，確保企業內部管理彈性獲得法制化保障。
-- **諮詢專業顧問專案體檢**：針對爭議疑慮進行個案法規審查，在爭議升級前完成合規防禦閉環。
-
-### 5. 總監策略心法
-**「制度不是束縛管理的枷鎖，而是保護企業基業長青的護城河。」** 釐清界限、留痕合法，才能在專注衝刺業務時無後顧之憂。
-
-*提示：請務必諮詢當地勞動法律顧問以確保合規*`;
-  };
 
   const handleRunDiagnosis = async () => {
     if (!issue.trim()) {
@@ -305,49 +193,12 @@ export const AiRiskScreening: React.FC = () => {
 
     const trimmedIssue = issue.trim();
 
-    // 1. Check if user selected one of the fixed presets ("固定快選")
-    const matchedPreset = presets.find(
-      (p) => p.text.trim() === trimmedIssue || trimmedIssue.includes(p.text.trim())
-    );
-
-    if (matchedPreset) {
-      setIsLoading(true);
-      setReportMarkdown("");
-      setRenderedHtml("");
-      // For fixed preset, show the curated strategic showcase report without burning API quota
-      const reportText = getBaselineDiagnosisReport(industry, size, matchedPreset.text);
-      setReportType("preset");
-      setReportMarkdown(reportText);
-      const parsed = await marked.parse(reportText);
-      setRenderedHtml(parsed);
-      setIsLoading(false);
-
-      try {
-        localStorage.setItem(
-          "last_diagnosis_data",
-          JSON.stringify({
-            industry,
-            size,
-            issue: trimmedIssue,
-            aiResult: reportText,
-          })
-        );
-      } catch (e) {
-        // ignore storage quota
-      }
-
-      if (window.innerWidth < 768 && resultContainerRef.current) {
-        resultContainerRef.current.scrollIntoView({ behavior: "smooth" });
-      }
-      return;
-    }
-
-    // 2. Check if input is completely irrelevant (e.g. "肚子餓")
+    // 1. Check if input is non-HR irrelevant chit-chat (e.g. "肚子餓")
     if (isIrrelevantIssue(trimmedIssue)) {
       setIsLoading(true);
       setReportMarkdown("");
       setRenderedHtml("");
-      const guidance = getBaselineDiagnosisReport(industry, size, trimmedIssue);
+      const guidance = IRRELEVANT_GUIDANCE_MESSAGE(trimmedIssue);
       setReportType("guidance");
       setReportMarkdown(guidance);
       const parsed = await marked.parse(guidance);
@@ -360,7 +211,6 @@ export const AiRiskScreening: React.FC = () => {
     setReportMarkdown("");
     setRenderedHtml("");
 
-    // 3. For custom inputs: Real AI diagnosis with multi-endpoint & automatic fallback!
     try {
       const payload = {
         industry,
@@ -372,6 +222,8 @@ export const AiRiskScreening: React.FC = () => {
       let modelUsedName = "";
       let isDegradedModel = false;
       let isRealAiSuccess = false;
+      let isQuotaExceeded = false;
+      let quotaReportMessage = "";
 
       // Try endpoints sequentially: Cloud Run backend (for GitHub Pages), custom URL, and relative API
       const candidateEndpoints = getCandidateApiUrls("/api/diagnose");
@@ -391,35 +243,44 @@ export const AiRiskScreening: React.FC = () => {
 
           if (response.ok) {
             const data = await response.json();
-            if (data.success && data.report && !data.quotaExceeded) {
+            if (data.quotaExceeded) {
+              isQuotaExceeded = true;
+              quotaReportMessage = data.report || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+              break;
+            }
+            if (data.success && data.report) {
               reportText = data.report;
               modelUsedName = data.modelUsed || "Gemini Flash";
               isDegradedModel = Boolean(data.isDegraded);
               isRealAiSuccess = true;
               break;
             }
+          } else if (response.status === 429) {
+            isQuotaExceeded = true;
+            quotaReportMessage = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+            break;
           }
         } catch (endpointErr) {
           console.warn(`[AI Diagnosis] Endpoint ${endpoint} attempt failed:`, endpointErr);
-          // Continue to next endpoint or fallback
         }
       }
 
-      if (isRealAiSuccess && reportText) {
+      if (isQuotaExceeded) {
+        // Quota is exhausted! Do NOT answer the question, prompt to contact site manager
+        reportText = quotaReportMessage || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+        setReportType("quota");
+        setModelEngineInfo(null);
+      } else if (isRealAiSuccess && reportText) {
         setReportType("real_ai");
         setModelEngineInfo({
           model: modelUsedName,
           isDegraded: isDegradedModel,
         });
       } else {
-        // Fall back gracefully to the comprehensive Strategic Decision Model
-        // This ensures GitHub Pages or offline users NEVER face false quota exhaustion!
-        reportText = getBaselineDiagnosisReport(industry, size, trimmedIssue);
-        setReportType("strategic_engine");
-        setModelEngineInfo({
-          model: "策略人資總監實戰決策模型",
-          isDegraded: true,
-        });
+        // No computing power / backend unreachable: do NOT answer question, prompt to contact site manager
+        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+        setReportType("quota");
+        setModelEngineInfo(null);
       }
 
       setReportMarkdown(reportText);
@@ -446,11 +307,10 @@ export const AiRiskScreening: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Diagnosis error:", err);
-      // Fallback directly to strategic report on any unexpected runtime error
-      const fallbackReport = getBaselineDiagnosisReport(industry, size, trimmedIssue);
-      setReportType("strategic_engine");
-      setReportMarkdown(fallbackReport);
-      const parsed = await marked.parse(fallbackReport);
+      // Quota exhausted or error: do NOT answer question, prompt to contact site manager
+      setReportType("quota");
+      setReportMarkdown(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
+      const parsed = await marked.parse(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
       setRenderedHtml(parsed);
     } finally {
       setIsLoading(false);
@@ -469,130 +329,346 @@ export const AiRiskScreening: React.FC = () => {
     setTimeout(() => setCopiedSuccess(false), 2000);
   };
 
-  const printReport = () => {
-    if (!renderedHtml) return;
+  const disclaimerText =
+    "【AI 診斷免責聲明】本報告由 AI 自動生成，僅供參考，不代表正式法律意見書。具體個案請以最新勞動法令、法院判決及專業律師、顧問團隊之書面意見為準。";
 
-    const disclaimerText =
-      "【AI 診斷免責聲明】本報告由 AI 自動生成，僅供參考，不代表正式法律意見書。具體個案請以最新勞動法令、法院判決及專業律師、顧問團隊之書面意見為準。";
+  const getPrintHtml = () => {
+    if (!renderedHtml) return "";
 
-    const printHtml = `
-      <!DOCTYPE html>
-      <html lang="zh-TW">
-      <head>
-        <meta charset="UTF-8">
-        <title>企業勞資戰略診斷報告 - 策略人資總監觀點</title>
-        <style>
-          @page { margin: 2cm 1.5cm 2.5cm 1.5cm; size: A4; }
-          body { font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif; line-height: 1.6; color: #1e293b; padding-bottom: 50px; }
-          .report-header { border-bottom: 3px solid #F59E0B; padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; }
-          .report-title { color: #0f172a; font-size: 26px; font-weight: 800; margin: 0 0 4px 0; }
-          .report-subtitle { color: #d97706; font-size: 14px; font-weight: 700; margin: 0; }
-          .contact-box { text-align: right; font-size: 13px; color: #475569; line-height: 1.4; }
-          .info-box { margin: 20px 0 25px 0; padding: 16px 20px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; page-break-inside: avoid; }
-          .info-title { font-weight: 700; color: #0f172a; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; font-size: 15px; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13.5px; }
-          .info-full { grid-column: span 2; margin-top: 4px; }
-          h1 { font-size: 20px; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px; }
-          h2, h3 { color: #0f172a; margin-top: 1.4em; border-left: 4px solid #F59E0B; padding-left: 10px; font-size: 16px; }
-          table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 13px; page-break-inside: avoid; }
-          th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; }
-          th { background: #f1f5f9; color: #1e293b; font-weight: 700; }
-          td:last-child { color: #dc2626; font-weight: 600; }
-          strong { color: #b45309; }
-          ul { padding-left: 20px; margin: 10px 0; }
-          li { margin-bottom: 6px; font-size: 14px; }
-          p { margin-bottom: 12px; font-size: 14px; }
-          #print-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 11px; color: #64748b; line-height: 1.4; }
-          .disclaimer-bold { font-weight: 600; display: block; margin-bottom: 2px; color: #475569; }
-        </style>
-      </head>
-      <body>
-        <div class="report-header">
-          <div>
-            <div class="report-title">企業勞資戰略診斷報告</div>
-            <div class="report-subtitle">策略人資總監 (Strategic HRBP) 觀點 ｜ 頭家神隊友顧問團隊</div>
-          </div>
-          <div class="contact-box">
-            <div><strong>諮詢專線：</strong>0923-869696 許顧問</div>
-            <div><strong>E-mail：</strong>360.aiup@gmail.com</div>
-            <div><strong>診斷日期：</strong>${new Date().toLocaleDateString("zh-TW")}</div>
-          </div>
-        </div>
+    return `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企業勞資戰略診斷報告 - 企業軍師Sandy企業勞資顧問團隊</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm 15mm 15mm;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html {
+      background: #f8fafc;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      font-family: 'Noto Sans TC', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      color: #1e293b;
+      padding: 16mm 18mm 20mm 18mm;
+      background: #ffffff;
+      margin: 20px auto;
+      width: 210mm;
+      max-width: 100%;
+      min-height: 297mm;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    .report-header {
+      border-bottom: 2.5px solid #F59E0B;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .report-title {
+      color: #0f172a;
+      font-size: 24px;
+      font-weight: 800;
+      margin: 0 0 2px 0;
+      letter-spacing: -0.02em;
+    }
+    .report-subtitle {
+      color: #b45309;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 2px 0 0 0;
+      letter-spacing: 0.02em;
+    }
+    .contact-box {
+      text-align: right;
+      font-size: 12px;
+      color: #475569;
+      line-height: 1.5;
+      flex-shrink: 0;
+    }
+    .contact-org {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 12px;
+    }
+    .contact-hotline {
+      font-weight: 700;
+      color: #b45309;
+      font-size: 12.5px;
+      margin-top: 1px;
+      margin-bottom: 2px;
+    }
+    .info-box {
+      margin: 18px 0 22px 0;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      page-break-inside: avoid;
+    }
+    .info-title {
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 4px;
+      font-size: 14px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .info-full {
+      grid-column: span 2;
+      margin-top: 4px;
+    }
+    h1 {
+      font-size: 19px;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 20px;
+      font-weight: 800;
+    }
+    h2, h3 {
+      color: #0f172a;
+      margin-top: 1.3em;
+      border-left: 4px solid #F59E0B;
+      padding-left: 10px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    table {
+      width: 100% !important;
+      max-width: 100% !important;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 12.5px;
+      table-layout: fixed;
+      page-break-inside: avoid;
+      word-break: break-word;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+    th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+    }
+    td {
+      color: #334155;
+    }
+    td:last-child {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    strong {
+      color: #b45309;
+    }
+    ul {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    li {
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      color: #334155;
+    }
+    p {
+      margin-bottom: 12px;
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.65;
+    }
+    pre, code {
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    .report-body {
+      color: #1e293b;
+      line-height: 1.65;
+      width: 100%;
+      max-width: 100%;
+    }
+    #print-footer {
+      margin-top: 36px;
+      padding-top: 10px;
+      border-top: 1px solid #cbd5e1;
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+      page-break-inside: avoid;
+    }
+    .disclaimer-bold {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+      color: #475569;
+    }
+    @media print {
+      html, body {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+      }
+      #print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding-top: 6px;
+        border-top: 1px solid #cbd5e1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-header">
+    <div>
+      <div class="report-title">企業勞資戰略診斷報告</div>
+      <div class="report-subtitle">策略人資總監觀點 ｜ 企業軍師Sandy企業勞資顧問團隊</div>
+    </div>
+    <div class="contact-box">
+      <div class="contact-hotline">預約諮詢專線：0923-869696</div>
+      <div><strong>E-mail：</strong>360.aiup@gmail.com</div>
+      <div><strong>診斷日期：</strong>${new Date().toLocaleDateString("zh-TW")}</div>
+    </div>
+  </div>
 
-        <div class="info-box">
-          <div class="info-title">📋 諮詢企業背景資訊</div>
-          <div class="info-grid">
-            <div><strong>所屬行業：</strong>${industry}</div>
-            <div><strong>公司規模：</strong>${size}</div>
-            <div class="info-full"><strong>管理痛點／疑問：</strong><br>${issue.replace(
-              /\n/g,
-              "<br>"
-            )}</div>
-          </div>
-        </div>
+  <div class="info-box">
+    <div class="info-title">📋 諮詢企業背景資訊</div>
+    <div class="info-grid">
+      <div><strong>所屬行業：</strong>${industry}</div>
+      <div><strong>公司規模：</strong>${size}</div>
+      <div class="info-full"><strong>管理痛點／疑問：</strong><br>${issue.replace(
+        /\n/g,
+        "<br>"
+      )}</div>
+    </div>
+  </div>
 
-        <div class="report-body">
-          ${renderedHtml}
-        </div>
+  <div class="report-body">
+    ${renderedHtml}
+  </div>
 
-        <div id="print-footer">
-          <span class="disclaimer-bold">${disclaimerText}</span>
-          頭家神隊友顧問團隊 &copy; 2026 All rights reserved. ｜ 預約實體深度診斷請洽 0923-869696
-        </div>
-      </body>
-      </html>
-    `;
+  <div id="print-footer">
+    <span class="disclaimer-bold">${disclaimerText}</span>
+    <div class="contact-org">企業軍師Sandy企業勞資顧問團隊</div>
+    <div class="contact-hotline">預約諮詢專線：0923-869696</div>
+  </div>
+</body>
+</html>`;
+  };
 
-    // Try hidden iframe approach first (iframe-safe and never blocked by popup blockers)
+  const openPrintInNewTab = () => {
+    const printHtml = getPrintHtml();
+    if (!printHtml) return;
+
+    // Inject auto-print script in new tab
+    const autoPrintHtml = printHtml.replace(
+      "</body>",
+      `<script>
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            window.focus();
+            window.print();
+          }, 350);
+        });
+      <\/script></body>`
+    );
+
+    const blob = new Blob([autoPrintHtml], { type: "text/html;charset=utf-8" });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = window.open(blobUrl, "_blank");
+
+    if (!win) {
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  };
+
+  const handleDirectPrint = () => {
+    const printHtml = getPrintHtml();
+    if (!printHtml) return;
+
+    // 1. Try off-screen visible iframe (visible to Chrome/Safari print engine)
     try {
-      const hiddenIframe = document.createElement("iframe");
-      hiddenIframe.style.position = "fixed";
-      hiddenIframe.style.right = "0";
-      hiddenIframe.style.bottom = "0";
-      hiddenIframe.style.width = "0";
-      hiddenIframe.style.height = "0";
-      hiddenIframe.style.border = "none";
-      hiddenIframe.style.visibility = "hidden";
-      document.body.appendChild(hiddenIframe);
+      const oldFrame = document.getElementById("ai-print-frame");
+      if (oldFrame) oldFrame.remove();
 
-      const frameDoc = hiddenIframe.contentWindow?.document;
+      const iframe = document.createElement("iframe");
+      iframe.id = "ai-print-frame";
+      iframe.style.position = "fixed";
+      iframe.style.top = "-9999px";
+      iframe.style.left = "-9999px";
+      iframe.style.width = "1024px";
+      iframe.style.height = "768px";
+      iframe.style.opacity = "0.01";
+      iframe.style.pointerEvents = "none";
+      iframe.style.border = "none";
+      document.body.appendChild(iframe);
+
+      const frameDoc = iframe.contentWindow?.document;
       if (frameDoc) {
         frameDoc.open();
         frameDoc.write(printHtml);
         frameDoc.close();
+
         setTimeout(() => {
           try {
-            hiddenIframe.contentWindow?.focus();
-            hiddenIframe.contentWindow?.print();
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
           } catch (e) {
-            console.error("Iframe print error:", e);
-          } finally {
-            setTimeout(() => {
-              if (document.body.contains(hiddenIframe)) {
-                document.body.removeChild(hiddenIframe);
-              }
-            }, 1500);
+            console.warn("Iframe print blocked, opening in new tab:", e);
+            openPrintInNewTab();
           }
-        }, 500);
+        }, 400);
         return;
       }
     } catch (err) {
-      console.warn("Iframe print not supported, falling back to window.open", err);
+      console.warn("Iframe creation error, falling back to new tab:", err);
     }
 
-    // Fallback: window.open without alert popup
-    try {
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        printWindow.document.write(printHtml);
-        printWindow.document.close();
-        setTimeout(() => {
-          printWindow.print();
-        }, 600);
-      }
-    } catch (e) {
-      console.error("Window print error:", e);
-    }
+    // Fallback: new tab
+    openPrintInNewTab();
+  };
+
+  const printReport = () => {
+    if (!renderedHtml) return;
+    // Always open preview modal for instant feedback
+    setShowPrintModal(true);
+    // Also trigger the direct print routine
+    handleDirectPrint();
   };
 
   return (
@@ -621,7 +697,7 @@ export const AiRiskScreening: React.FC = () => {
             AI 企業勞資戰略風險快篩
           </h2>
           <p className="text-slate-300 max-w-2xl mx-auto text-base">
-            以 Strategic HRBP 與經營者視角出發，將法規遵循轉化為商業競爭力，快速檢視潛在財務罰鍰與關鍵行動計畫
+            以經營者視角出發，將法規遵循轉化為商業競爭力，快速檢視潛在財務罰鍰與關鍵行動計畫
           </p>
         </div>
 
@@ -682,34 +758,7 @@ export const AiRiskScreening: React.FC = () => {
                 />
               </div>
 
-              {/* Quick Presets */}
-              <div>
-                <span className="block text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
-                  <span className="flex items-center">
-                    <Lightbulb className="w-3.5 h-3.5 mr-1 text-amber-400" />
-                    常見情境固定快選（免消耗 AI 額度）：
-                  </span>
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {presets.map((p, idx) => {
-                    const isSelected = issue.trim() === p.text.trim();
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setIssue(p.text)}
-                        className={`text-xs px-2.5 py-1 rounded border transition ${
-                          isSelected
-                            ? "bg-amber-500/20 border-amber-500 text-amber-300 font-semibold"
-                            : "bg-slate-900/80 hover:bg-slate-700 text-slate-300 hover:text-amber-400 border-slate-700"
-                        }`}
-                      >
-                        {p.title}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+
 
               {errorMessage && (
                 <div className="p-3 bg-red-950/60 border border-red-800 rounded-lg text-red-300 text-xs flex items-center">
@@ -791,36 +840,24 @@ export const AiRiskScreening: React.FC = () => {
                     {reportType === "quota" ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
-                        <h3 className="text-amber-400 font-bold text-base">今日AI額度已使用完畢</h3>
-                      </>
-                    ) : reportType === "preset" ? (
-                      <>
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-                        <h3 className="text-white font-bold text-base">固定快選示範報告</h3>
-                        <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded">固定快選</span>
+                        <h3 className="text-amber-400 font-bold text-base">今日 AI 額度已使用完畢</h3>
                       </>
                     ) : reportType === "guidance" ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                         <h3 className="text-amber-400 font-bold text-base">勞資戰略快篩提示</h3>
                       </>
-                    ) : reportType === "strategic_engine" ? (
-                      <>
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                        <h3 className="text-white font-bold text-base">企業勞資戰略診斷報告</h3>
-                        <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded">
-                          策略人資總監模型
-                        </span>
-                      </>
                     ) : (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                        <h3 className="text-white font-bold text-base">AI 即時診斷報告</h3>
-                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">即時 AI 運算</span>
+                        <h3 className="text-white font-bold text-base">企業勞資戰略診斷報告</h3>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">
+                          {modelEngineInfo ? "即時 AI 運算" : "策略總監示範範本"}
+                        </span>
                       </>
                     )}
 
-                    {(reportType === "real_ai" || reportType === "strategic_engine") && modelEngineInfo && (
+                    {reportType === "real_ai" && modelEngineInfo && (
                       <span
                         className={`text-[10px] px-2 py-0.5 rounded border flex items-center ${
                           modelEngineInfo.isDegraded
@@ -834,34 +871,45 @@ export const AiRiskScreening: React.FC = () => {
                         }
                       >
                         <Cpu className="w-3 h-3 mr-1" />
-                        {modelEngineInfo.isDegraded ? (modelEngineInfo.model.includes("策略") ? "策略實戰決策模型" : "已自動降級為輕量模型") : "Gemini 深度引擎"}
+                        {modelEngineInfo.isDegraded ? "已自動降級為輕量模型" : "Gemini 深度引擎"}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={handleCopyReport}
-                      className="text-xs bg-slate-800 text-slate-200 hover:text-white px-3 py-1.5 rounded flex items-center border border-slate-700 hover:border-slate-500 transition"
-                      title="複製報告文字"
-                    >
-                      {copiedSuccess ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 mr-1 text-green-400" />
-                          已複製
-                        </>
-                      ) : (
-                        "複製全文"
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={printReport}
-                      className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded flex items-center border border-slate-600 hover:border-amber-400 transition"
-                    >
-                      <Printer className="w-3.5 h-3.5 mr-1 text-amber-400" />
-                      列印報告
-                    </button>
+                    {reportType === "quota" ? (
+                      <a
+                        href="#contact-section"
+                        className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded flex items-center shadow transition"
+                      >
+                        洽詢網站管理者
+                      </a>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleCopyReport}
+                          className="text-xs bg-slate-800 text-slate-200 hover:text-white px-3 py-1.5 rounded flex items-center border border-slate-700 hover:border-slate-500 transition"
+                          title="複製報告文字"
+                        >
+                          {copiedSuccess ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 mr-1 text-green-400" />
+                              已複製
+                            </>
+                          ) : (
+                            "複製全文"
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={printReport}
+                          className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded flex items-center border border-slate-600 hover:border-amber-400 transition"
+                        >
+                          <Printer className="w-3.5 h-3.5 mr-1 text-amber-400" />
+                          列印報告
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -889,6 +937,165 @@ export const AiRiskScreening: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* 列印報告預覽與匯出 Modal */}
+      {showPrintModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto animate-fadeIn"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[94vh] overflow-hidden my-auto">
+            {/* Modal 控制列 */}
+            <div className="bg-slate-800/90 border-b border-slate-700 px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <Printer className="w-5 h-5 text-amber-400" />
+                <h3 className="text-white font-bold text-sm sm:text-base">
+                  列印診斷報告預覽
+                </h3>
+                <span className="text-[11px] bg-slate-700/80 text-amber-300 px-2 py-0.5 rounded border border-slate-600 font-medium hidden sm:inline-block">
+                  標準 A4 規格 (210mm)
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={handleDirectPrint}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg flex items-center text-xs shadow transition active:scale-95"
+                  title="呼叫列印或另存為 PDF"
+                >
+                  <Printer className="w-3.5 h-3.5 mr-1.5" />
+                  立即列印 / 另存 PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={openPrintInNewTab}
+                  className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg flex items-center text-xs border border-slate-600 hover:border-amber-400 transition"
+                  title="在獨立分頁開啟（防止瀏覽器封鎖列印彈窗）"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+                  在新分頁開啟
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyReport}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg flex items-center text-xs border border-slate-700 transition"
+                >
+                  {copiedSuccess ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 mr-1.5 text-green-400" />
+                      已複製
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+                      複製全文
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPrintModal(false)}
+                  className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-700 transition"
+                  title="關閉"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* 提示橫幅 */}
+            <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-xs text-amber-300 flex items-center justify-between">
+              <span>
+                💡 提示：若您的瀏覽器因安全外掛限制而未自動開啟列印視窗，請點選上方【在新分頁開啟】即可正常列印或另存為 PDF。
+              </span>
+            </div>
+
+            {/* A4 格式報告預覽紙張 */}
+            <div className="p-3 sm:p-6 overflow-y-auto bg-slate-950 flex-grow flex justify-center">
+              <div className="bg-white text-slate-800 p-6 sm:p-10 rounded-xl shadow-2xl border border-slate-300 font-sans w-full max-w-[210mm] min-h-[297mm] mx-auto leading-relaxed text-sm box-border">
+                {/* 頂部標題與專線 */}
+                <div className="border-b-[2.5px] border-amber-500 pb-3 mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 m-0 tracking-tight">
+                      企業勞資戰略診斷報告
+                    </h1>
+                    <div className="text-amber-700 font-semibold text-[11px] mt-1 tracking-normal">
+                      策略人資總監觀點 ｜ 企業軍師Sandy企業勞資顧問團隊
+                    </div>
+                  </div>
+                  <div className="text-left sm:text-right text-xs text-slate-600 leading-relaxed shrink-0">
+                    <div className="text-amber-700 font-bold">
+                      預約諮詢專線：0923-869696
+                    </div>
+                    <div>
+                      <strong>E-mail：</strong>360.aiup@gmail.com
+                    </div>
+                    <div>
+                      <strong>診斷日期：</strong>
+                      {new Date().toLocaleDateString("zh-TW")}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 諮詢企業背景資訊 */}
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+                  <div className="font-bold text-slate-900 mb-2 border-b border-slate-200 pb-1 text-xs">
+                    📋 諮詢企業背景資訊
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <strong>所屬行業：</strong>
+                      {industry}
+                    </div>
+                    <div>
+                      <strong>公司規模：</strong>
+                      {size}
+                    </div>
+                    <div className="sm:col-span-2 mt-1">
+                      <strong>管理痛點／疑問：</strong>
+                      <div className="mt-1 whitespace-pre-wrap text-slate-700">
+                        {issue}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 診斷報告內容 */}
+                <div
+                  className="print-preview-content leading-relaxed space-y-4 max-w-full overflow-hidden break-words"
+                  dangerouslySetInnerHTML={{ __html: renderedHtml }}
+                />
+
+                {/* 底部版權宣告與專線 */}
+                <div className="mt-10 pt-4 border-t border-slate-300 text-[11px] text-slate-500 leading-relaxed">
+                  <div className="font-semibold text-slate-700 mb-1">
+                    {disclaimerText}
+                  </div>
+                  <div className="font-semibold text-slate-800">
+                    企業軍師Sandy企業勞資顧問團隊
+                  </div>
+                  <div className="font-bold text-amber-800">
+                    預約諮詢專線：0923-869696
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 底部關閉列 */}
+            <div className="bg-slate-800/80 border-t border-slate-700 px-4 py-2.5 sm:px-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowPrintModal(false)}
+                className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg transition"
+              >
+                關閉預覽
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
