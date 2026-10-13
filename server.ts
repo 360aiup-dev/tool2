@@ -283,6 +283,24 @@ const CASCADE_FALLBACK_MODELS = [
   "gemini-2.5-flash-lite",
 ];
 
+// 全域請求計數器：用於雙金鑰輪詢分流 (Round-Robin Load Balancing)
+let globalRequestCounter = 0;
+
+// 智慧快取池：相同情境在 1 小時內重複快篩直接命中快取，消耗 0 點 AI 額度
+interface CacheItem {
+  report: string;
+  modelUsed: string;
+  keyUsedLabel: string;
+  cachedAt: number;
+}
+const diagnosisCache = new Map<string, CacheItem>();
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 小時 (60分鐘)
+
+function getCacheKey(industry: string, size: string, issue: string): string {
+  const cleanIssue = issue.toLowerCase().replace(/\s+/g, " ").trim();
+  return `${industry.trim()}|${size.trim()}|${cleanIssue}`;
+}
+
 // AI Diagnostic endpoint
 app.post("/api/diagnose", async (req, res) => {
   try {
@@ -330,6 +348,20 @@ app.post("/api/diagnose", async (req, res) => {
       return res.json({
         success: true,
         report: IRRELEVANT_GUIDANCE_MESSAGE(protectedIssue),
+      });
+    }
+
+    // 安全機制 6: 智慧快取比對 (重複或相同情境 1 小時內 0 Token 消耗，節省並保護配額)
+    const cacheKey = getCacheKey(industry, size, sanitizedIssue);
+    const cachedResult = diagnosisCache.get(cacheKey);
+    if (cachedResult && Date.now() - cachedResult.cachedAt < CACHE_TTL_MS) {
+      console.log(`[Cache Hit] Returning cached report for query (Saved Gemini API calls!)`);
+      return res.json({
+        success: true,
+        quotaExceeded: false,
+        report: cachedResult.report,
+        modelUsed: `${cachedResult.modelUsed} (Cached)`,
+        keyUsedLabel: `${cachedResult.keyUsedLabel} (Cache Hit)`,
       });
     }
 
@@ -386,8 +418,12 @@ ${protectedIssue}`;
 
 請全程使用專業繁體中文 (台灣用語習慣)，展現頂尖策略顧問的高度與穿透力。`;
 
-    // 執行：多金鑰容錯池 x 5 級階梯式降級 (Multi-Account Failover & 5-Stage Cascade Fallback)
-    keyLoop: for (let keyIdx = 0; keyIdx < instances.length; keyIdx++) {
+    // 核心優化：雙金鑰輪詢分流 (Round-Robin) + 自動容錯 (Failover) + 5 級階梯降級
+    // 計算本次請求的起始金鑰索引 (0 或 1 輪流)，平分兩個帳號的 RPM/RPD 額度負荷
+    const startIndex = (globalRequestCounter++) % instances.length;
+
+    keyLoop: for (let offset = 0; offset < instances.length; offset++) {
+      const keyIdx = (startIndex + offset) % instances.length;
       const { client, label } = instances[keyIdx];
 
       for (const model of CASCADE_FALLBACK_MODELS) {
@@ -426,6 +462,19 @@ ${protectedIssue}`;
             modelUsed = model;
             keyUsedLabel = label;
             console.log(`[AI Diagnose] Success! Generated with [${label}] model: ${model}`);
+
+            // 成功產出時存入快取池 (最多保留 200 筆，避免記憶體溢位)
+            if (diagnosisCache.size > 200) {
+              const oldestKey = diagnosisCache.keys().next().value;
+              if (oldestKey) diagnosisCache.delete(oldestKey);
+            }
+            diagnosisCache.set(cacheKey, {
+              report: reportMarkdown,
+              modelUsed,
+              keyUsedLabel,
+              cachedAt: Date.now(),
+            });
+
             break keyLoop;
           }
         } catch (modelErr: any) {
