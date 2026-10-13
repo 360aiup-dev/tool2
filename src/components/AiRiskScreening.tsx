@@ -854,12 +854,12 @@ export const AiRiskScreening: React.FC = () => {
                         }`}
                         title={
                           modelEngineInfo.isDegraded
-                            ? "目前線上負載較高，系統已自動啟用階梯降級機制切換至節能 Lite 模型，保障服務不中斷"
-                            : "使用 Google Gemini 深度推理引擎分析"
+                            ? `系統已自動啟動 5 級階梯降級機制 (當前調用: ${modelEngineInfo.model})，保障診斷服務不中斷`
+                            : `使用 Google Gemini 深度推理引擎分析 (${modelEngineInfo.model || "gemini-3.8-flash"})`
                         }
                       >
                         <Cpu className="w-3 h-3 mr-1" />
-                        {modelEngineInfo.isDegraded ? "已自動降級為輕量模型" : "Gemini 深度引擎"}
+                        {modelEngineInfo.isDegraded ? `已啟用階梯降級 (${modelEngineInfo.model})` : "Gemini 深度引擎"}
                       </span>
                     )}
                   </div>
