@@ -864,14 +864,7 @@ export const AiRiskScreening: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {reportType === "quota" ? (
-                      <a
-                        href="#contact-section"
-                        className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded flex items-center shadow transition"
-                      >
-                        洽詢網站管理者
-                      </a>
-                    ) : (
+                    {reportType !== "quota" && (
                       <>
                         <button
                           type="button"
