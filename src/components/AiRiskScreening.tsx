@@ -38,7 +38,7 @@ export const AiRiskScreening: React.FC = () => {
   const [savedCustomKey, setSavedCustomKey] = useState<string>("");
   const [keySavedToast, setKeySavedToast] = useState<boolean>(false);
   const [reportType, setReportType] = useState<
-    "real_ai" | "quota" | "guidance"
+    "real_ai" | "quota" | "guidance" | "server_unreachable"
   >("real_ai");
   const [modelEngineInfo, setModelEngineInfo] = useState<{ model: string; isDegraded: boolean } | null>(null);
 
@@ -51,8 +51,8 @@ export const AiRiskScreening: React.FC = () => {
     message?: string;
   }>({
     status: "idle",
-    keyLabel: "Key 1 / Key 2 雙金鑰池",
-    message: "系統防護與算力就緒",
+    keyLabel: "連線偵測中...",
+    message: "正在確認 AI 伺服器狀態...",
   });
 
   const resultContainerRef = useRef<HTMLDivElement>(null);
@@ -66,19 +66,51 @@ export const AiRiskScreening: React.FC = () => {
       setSavedCustomKey(storedKey);
       setCustomKeyInput(storedKey);
 
-      if (storedKey) {
+      // 動態真實檢測環境與後端連線，絕不盲目假裝「系統就緒」
+      const checkBackendStatus = async () => {
+        if (storedKey && storedKey.trim().length > 15) {
+          setApiLiveStatus({
+            status: "idle",
+            keyLabel: "專屬自訂 Key (已綁定)",
+            message: "專屬算力通道已就緒 (直連可用)",
+          });
+          return;
+        }
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const res = await fetch("/api/health", { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const data = await res.json();
+            setApiLiveStatus({
+              status: "idle",
+              keyLabel: `Key 1 / Key 2 雙金鑰池 (${data.configuredApiKeysCount || 2}組)`,
+              message: "後端伺服器已連線，算力防護就緒",
+            });
+            return;
+          }
+        } catch (err) {
+          // 後端伺服器無法連線 (例如在 GitHub Pages 靜態環境)
+        }
+
+        const isGH =
+          typeof window !== "undefined" &&
+          (window.location.hostname.includes("github.io") ||
+            (window.location.hostname.includes("localhost") === false &&
+              !window.location.hostname.includes("run.app")));
+
         setApiLiveStatus({
-          status: "idle",
-          keyLabel: "專屬自訂 Key (已綁定)",
-          message: "專屬算力通道已就緒",
+          status: isGH ? "failed" : "idle",
+          keyLabel: isGH ? "靜態託管 (未連線後端)" : "待命中",
+          message: isGH
+            ? "純靜態環境無後端，請點右側【金鑰設定】填入 Key 即可使用"
+            : "點擊開始 AI 診斷發起請求",
         });
-      } else {
-        setApiLiveStatus({
-          status: "idle",
-          keyLabel: "Key 1 / Key 2 雙金鑰輪替池",
-          message: "系統防護與算力就緒",
-        });
-      }
+      };
+
+      checkBackendStatus();
 
       const saved = localStorage.getItem("last_diagnosis_data");
       if (saved) {
@@ -155,6 +187,26 @@ export const AiRiskScreening: React.FC = () => {
 ---
 
 💡 **您亦可點擊下方「🔑 輸入自訂 Key 繼續」填入您的 Gemini API Key，或於本頁面下方「預約深度諮詢」填寫表單！**`;
+
+  const SERVER_UNREACHABLE_CLIENT_MESSAGE = `# ⚠️ 未連線至後端 AI 伺服器
+
+目前系統偵測到您所處的瀏覽環境（如 **GitHub Pages 靜態網站**）尚未連線至 Node.js 後端伺服器。
+
+純靜態網頁無法直接調用伺服器端的環境變數（Key 1 / Key 2），因此無法透過後端進行自動運算。
+
+---
+
+### 💡 立即在此環境啟用的方式（1 秒解決）：
+1. 點擊下方 **「🔑 填入自訂 Key 繼續」**（或點擊表單上的【金鑰設定】）。
+2. 貼上您的 Gemini API Key（安全儲存於您本地瀏覽器）。
+3. 系統將立刻在您的瀏覽器**啟動直接連線引擎**，不受任何伺服器限制，即刻產出專業診斷報告！
+
+---
+
+### 亦可直接諮詢顧問團隊：
+- **諮詢專線**：0923-869696 Sandy顧問
+- **官方 LINE 諮詢**：[點此加入 LINE 諮詢](https://lin.ee/udQp9wm)
+- **電子信箱**：360.aiup@gmail.com`;
 
   const isIrrelevantIssue = (iss: string): boolean => {
     const trimmed = iss.trim();
@@ -372,15 +424,26 @@ ${trimmedIssue}`;
           isDegraded: isDegradedModel,
         });
       } else {
-        // No computing power / backend unreachable: prompt quota message
-        reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
-        setReportType("quota");
-        setModelEngineInfo(null);
-        setApiLiveStatus({
-          status: isQuotaExceeded ? "rate_limited" : "failed",
-          keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
-          message: isQuotaExceeded ? "限流中：所有金鑰額度暫時達上限 (429)" : "連線失敗：API 伺服器無回應",
-        });
+        // 未能產出報告：精確區分「429 限流」與「後端未連線」
+        if (isQuotaExceeded) {
+          reportText = quotaReportMessage || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+          setReportType("quota");
+          setModelEngineInfo(null);
+          setApiLiveStatus({
+            status: "rate_limited",
+            keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
+            message: "限流中：所有金鑰額度暫時達上限 (429)",
+          });
+        } else {
+          reportText = SERVER_UNREACHABLE_CLIENT_MESSAGE;
+          setReportType("server_unreachable");
+          setModelEngineInfo(null);
+          setApiLiveStatus({
+            status: "failed",
+            keyLabel: savedCustomKey ? "專屬自訂 Key" : "未連線後端",
+            message: "連線失敗：靜態託管環境無後端，請點右側【金鑰設定】填入 Key",
+          });
+        }
       }
 
       setReportMarkdown(reportText);
@@ -407,15 +470,15 @@ ${trimmedIssue}`;
       }
     } catch (err: any) {
       console.error("Diagnosis error:", err);
-      // Quota exhausted or error: do NOT answer question, prompt to contact site manager
-      setReportType("quota");
-      setReportMarkdown(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
-      const parsed = await marked.parse(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
+      const fallbackMsg = SERVER_UNREACHABLE_CLIENT_MESSAGE;
+      setReportType("server_unreachable");
+      setReportMarkdown(fallbackMsg);
+      const parsed = await marked.parse(fallbackMsg);
       setRenderedHtml(parsed);
       setApiLiveStatus({
         status: "failed",
-        keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
-        message: "API 請求發生異常中斷",
+        keyLabel: savedCustomKey ? "專屬自訂 Key" : "未連線後端",
+        message: "API 連線中斷：請點右側【金鑰設定】填入 Key 直接啟用",
       });
     } finally {
       setIsLoading(false);
@@ -968,17 +1031,6 @@ ${trimmedIssue}`;
                     </div>
                   </div>
                 </div>
-
-                {/* 右側快速按鈕 */}
-                <button
-                  type="button"
-                  onClick={() => setShowKeyModal(true)}
-                  className="shrink-0 ml-2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-md border border-slate-700 text-[11px] flex items-center transition cursor-pointer"
-                  title="管理與查看金鑰狀態"
-                >
-                  <Key className="w-3 h-3 mr-1 text-amber-400" />
-                  金鑰設定
-                </button>
               </div>
 
               <button
@@ -1081,6 +1133,11 @@ ${trimmedIssue}`;
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
                         <h3 className="text-amber-400 font-bold text-base">今日 AI 額度已使用完畢</h3>
                       </>
+                    ) : reportType === "server_unreachable" ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                        <h3 className="text-rose-400 font-bold text-base">未連線後端 AI 伺服器</h3>
+                      </>
                     ) : reportType === "guidance" ? (
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
@@ -1094,7 +1151,7 @@ ${trimmedIssue}`;
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {reportType === "quota" && (
+                    {(reportType === "quota" || reportType === "server_unreachable") && (
                       <button
                         type="button"
                         onClick={() => setShowKeyModal(true)}
@@ -1105,7 +1162,7 @@ ${trimmedIssue}`;
                         填入自訂 Key 繼續
                       </button>
                     )}
-                    {reportType !== "quota" && (
+                    {reportType !== "quota" && reportType !== "server_unreachable" && (
                       <>
                         <button
                           type="button"
