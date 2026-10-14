@@ -42,6 +42,19 @@ export const AiRiskScreening: React.FC = () => {
   >("real_ai");
   const [modelEngineInfo, setModelEngineInfo] = useState<{ model: string; isDegraded: boolean } | null>(null);
 
+  // 即時 API 狀態指示燈與 Key 辨識狀態
+  const [keyUsedForDisplay, setKeyUsedForDisplay] = useState<string>("");
+  const [apiLiveStatus, setApiLiveStatus] = useState<{
+    status: "idle" | "requesting" | "success" | "rate_limited" | "failed";
+    keyLabel: string;
+    modelUsed?: string;
+    message?: string;
+  }>({
+    status: "idle",
+    keyLabel: "Key 1 / Key 2 雙金鑰池",
+    message: "系統防護與算力就緒",
+  });
+
   const resultContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,6 +65,20 @@ export const AiRiskScreening: React.FC = () => {
       const storedKey = localStorage.getItem("user_custom_gemini_key") || "";
       setSavedCustomKey(storedKey);
       setCustomKeyInput(storedKey);
+
+      if (storedKey) {
+        setApiLiveStatus({
+          status: "idle",
+          keyLabel: "專屬自訂 Key (已綁定)",
+          message: "專屬算力通道已就緒",
+        });
+      } else {
+        setApiLiveStatus({
+          status: "idle",
+          keyLabel: "Key 1 / Key 2 雙金鑰輪替池",
+          message: "系統防護與算力就緒",
+        });
+      }
 
       const saved = localStorage.getItem("last_diagnosis_data");
       if (saved) {
@@ -189,6 +216,13 @@ export const AiRiskScreening: React.FC = () => {
     setRenderedHtml("");
 
     try {
+      const currentActiveKey = savedCustomKey ? "專屬自訂 Key" : "自動分流 (Key 1 / Key 2)";
+      setApiLiveStatus({
+        status: "requesting",
+        keyLabel: currentActiveKey,
+        message: "API 請求傳輸中，正在進行勞動法令風險比對...",
+      });
+
       const payload = {
         industry,
         size,
@@ -229,6 +263,11 @@ export const AiRiskScreening: React.FC = () => {
             if (data.quotaExceeded) {
               isQuotaExceeded = true;
               quotaReportMessage = data.report || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+              setApiLiveStatus({
+                status: "rate_limited",
+                keyLabel: data.keyUsedLabel || (savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2"),
+                message: "限流中：所有金鑰額度暫時達上限 (429)",
+              });
               break;
             }
             if (data.success && data.report) {
@@ -236,11 +275,31 @@ export const AiRiskScreening: React.FC = () => {
               modelUsedName = data.modelUsed || "Gemini Flash";
               isDegradedModel = Boolean(data.isDegraded);
               isRealAiSuccess = true;
+              const rawKeyLabel = data.keyUsedLabel || "";
+              const normalizedKey = rawKeyLabel.includes("主帳號")
+                ? "Key 1 (主帳號)"
+                : rawKeyLabel.includes("第二帳號") || rawKeyLabel.includes("GEMINI_API_KEY_2")
+                ? "Key 2 (第二帳號)"
+                : savedCustomKey
+                ? "專屬自訂 Key"
+                : "Key 1 (主帳號)";
+              setKeyUsedForDisplay(normalizedKey);
+              setApiLiveStatus({
+                status: "success",
+                keyLabel: normalizedKey,
+                modelUsed: modelUsedName,
+                message: `成功完成診斷分析 (${modelUsedName})`,
+              });
               break;
             }
           } else if (response.status === 429) {
             isQuotaExceeded = true;
             quotaReportMessage = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
+            setApiLiveStatus({
+              status: "rate_limited",
+              keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
+              message: "限流中 (429 Too Many Requests)，請稍候再試",
+            });
             break;
           }
         } catch (endpointErr) {
@@ -278,6 +337,13 @@ ${trimmedIssue}`;
                 modelUsedName = `${directModel} (專屬金鑰直連)`;
                 isRealAiSuccess = true;
                 isQuotaExceeded = false;
+                setKeyUsedForDisplay("專屬自訂 Key (前端直連)");
+                setApiLiveStatus({
+                  status: "success",
+                  keyLabel: "專屬自訂 Key (前端直連)",
+                  modelUsed: directModel,
+                  message: `直連成功完成診斷 (${directModel})`,
+                });
                 break;
               }
             } catch (dmErr: any) {
@@ -294,6 +360,11 @@ ${trimmedIssue}`;
         reportText = quotaReportMessage || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
         setReportType("quota");
         setModelEngineInfo(null);
+        setApiLiveStatus({
+          status: "rate_limited",
+          keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
+          message: "限流中：所有金鑰額度暫時達上限 (429)",
+        });
       } else if (isRealAiSuccess && reportText) {
         setReportType("real_ai");
         setModelEngineInfo({
@@ -305,6 +376,11 @@ ${trimmedIssue}`;
         reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
         setReportType("quota");
         setModelEngineInfo(null);
+        setApiLiveStatus({
+          status: isQuotaExceeded ? "rate_limited" : "failed",
+          keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
+          message: isQuotaExceeded ? "限流中：所有金鑰額度暫時達上限 (429)" : "連線失敗：API 伺服器無回應",
+        });
       }
 
       setReportMarkdown(reportText);
@@ -336,6 +412,11 @@ ${trimmedIssue}`;
       setReportMarkdown(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
       const parsed = await marked.parse(QUOTA_EXHAUSTED_CLIENT_MESSAGE);
       setRenderedHtml(parsed);
+      setApiLiveStatus({
+        status: "failed",
+        keyLabel: savedCustomKey ? "專屬自訂 Key" : "Key 1 / Key 2",
+        message: "API 請求發生異常中斷",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -358,9 +439,19 @@ ${trimmedIssue}`;
     if (!cleaned) {
       localStorage.removeItem("user_custom_gemini_key");
       setSavedCustomKey("");
+      setApiLiveStatus({
+        status: "idle",
+        keyLabel: "Key 1 / Key 2 雙金鑰輪替池",
+        message: "已切換回系統金鑰池",
+      });
     } else {
       localStorage.setItem("user_custom_gemini_key", cleaned);
       setSavedCustomKey(cleaned);
+      setApiLiveStatus({
+        status: "idle",
+        keyLabel: "專屬自訂 Key (已綁定)",
+        message: "專屬算力通道已就緒",
+      });
     }
     setKeySavedToast(true);
     setTimeout(() => setKeySavedToast(false), 2500);
@@ -370,6 +461,11 @@ ${trimmedIssue}`;
     localStorage.removeItem("user_custom_gemini_key");
     setCustomKeyInput("");
     setSavedCustomKey("");
+    setApiLiveStatus({
+      status: "idle",
+      keyLabel: "Key 1 / Key 2 雙金鑰輪替池",
+      message: "已切換回系統金鑰池",
+    });
     setKeySavedToast(true);
     setTimeout(() => setKeySavedToast(false), 2500);
   };
@@ -811,6 +907,80 @@ ${trimmedIssue}`;
                 </div>
               )}
 
+              {/* 即時 API 狀態指示燈與 Key 辨識面板 */}
+              <div className="bg-slate-900/90 rounded-xl p-3 border border-slate-700/80 flex items-center justify-between text-xs transition-all shadow-inner">
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  {/* 動態指示燈 (光暈動態) */}
+                  <div className="relative flex items-center justify-center shrink-0 w-3.5 h-3.5">
+                    {apiLiveStatus.status === "requesting" && (
+                      <>
+                        <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400"></span>
+                      </>
+                    )}
+                    {apiLiveStatus.status === "success" && (
+                      <>
+                        <span className="animate-pulse absolute inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 opacity-60"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                      </>
+                    )}
+                    {apiLiveStatus.status === "rate_limited" && (
+                      <>
+                        <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-orange-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                      </>
+                    )}
+                    {apiLiveStatus.status === "failed" && (
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                    )}
+                    {apiLiveStatus.status === "idle" && (
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500/80"></span>
+                    )}
+                  </div>
+
+                  {/* 狀態說明文字 */}
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center space-x-1.5 truncate">
+                      <span className={`font-semibold ${
+                        apiLiveStatus.status === "success"
+                          ? "text-emerald-400"
+                          : apiLiveStatus.status === "requesting"
+                          ? "text-amber-300"
+                          : apiLiveStatus.status === "rate_limited"
+                          ? "text-orange-400"
+                          : apiLiveStatus.status === "failed"
+                          ? "text-rose-400"
+                          : "text-slate-300"
+                      }`}>
+                        {apiLiveStatus.status === "requesting" && "連線調度中"}
+                        {apiLiveStatus.status === "success" && "連線正常 (成功)"}
+                        {apiLiveStatus.status === "rate_limited" && "限流中 (429)"}
+                        {apiLiveStatus.status === "failed" && "連線失敗"}
+                        {apiLiveStatus.status === "idle" && "系統就緒"}
+                      </span>
+                      <span className="text-slate-600">|</span>
+                      <span className="text-amber-400 font-mono font-medium truncate">
+                        {apiLiveStatus.keyLabel}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 truncate">
+                      {apiLiveStatus.message || "多金鑰輪替分流與自動容錯就緒"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 右側快速按鈕 */}
+                <button
+                  type="button"
+                  onClick={() => setShowKeyModal(true)}
+                  className="shrink-0 ml-2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-md border border-slate-700 text-[11px] flex items-center transition cursor-pointer"
+                  title="管理與查看金鑰狀態"
+                >
+                  <Key className="w-3 h-3 mr-1 text-amber-400" />
+                  金鑰設定
+                </button>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
@@ -920,30 +1090,7 @@ ${trimmedIssue}`;
                       <>
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                         <h3 className="text-white font-bold text-base">企業勞資戰略診斷報告</h3>
-                        {modelEngineInfo && (
-                          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">
-                            即時 AI 運算
-                          </span>
-                        )}
                       </>
-                    )}
-
-                    {reportType === "real_ai" && modelEngineInfo && (
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded border flex items-center ${
-                          modelEngineInfo.isDegraded
-                            ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                            : "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                        }`}
-                        title={
-                          modelEngineInfo.isDegraded
-                            ? `系統已自動啟動 5 級階梯降級機制 (當前調用: ${modelEngineInfo.model})，保障診斷服務不中斷`
-                            : `使用 Google Gemini 深度推理引擎分析 (${modelEngineInfo.model || "gemini-3.8-flash"})`
-                        }
-                      >
-                        <Cpu className="w-3 h-3 mr-1" />
-                        {modelEngineInfo.isDegraded ? `已啟用階梯降級 (${modelEngineInfo.model})` : "Gemini 深度引擎"}
-                      </span>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
