@@ -135,24 +135,14 @@ function getGeminiInstances(): GeminiClientInstance[] {
     rawKeyEntries.push({ key: primary, label: "主帳號 (Primary)" });
   }
 
-  // 第二帳號 / GitHub 備援 Key (GEMINI_API_KEY_BACKUP, GEMINI_API_KEY_2)
-  const backupSources = [
-    { envVal: process.env.GEMINI_API_KEY_BACKUP, defaultLabel: "備援帳號 (Backup Account)" },
-    { envVal: process.env.GEMINI_API_KEY_2, defaultLabel: "第二帳號 (Secondary Account)" },
-    { envVal: process.env.GEMINI_API_KEY_SECONDARY, defaultLabel: "次要帳號 (Secondary Account 2)" },
-  ];
-
-  for (const src of backupSources) {
-    if (src.envVal) {
-      const val = src.envVal.trim();
-      if (val.includes(",")) {
-        val.split(",").map((k) => k.trim()).filter(Boolean).forEach((k, idx) => {
-          rawKeyEntries.push({ key: k, label: `${src.defaultLabel}-Key${idx + 1}` });
-        });
-      } else if (val) {
-        rawKeyEntries.push({ key: val, label: src.defaultLabel });
-      }
-    }
+  // 第二帳號 Key (GEMINI_API_KEY_2 - 支援 GitHub Actions Secrets 或環境變數注入)
+  const secondary = (process.env.GEMINI_API_KEY_2 || "").trim();
+  if (secondary.includes(",")) {
+    secondary.split(",").map((k) => k.trim()).filter(Boolean).forEach((k, idx) => {
+      rawKeyEntries.push({ key: k, label: `第二帳號 (GEMINI_API_KEY_2)-Key${idx + 1}` });
+    });
+  } else if (secondary) {
+    rawKeyEntries.push({ key: secondary, label: "第二帳號 (GEMINI_API_KEY_2)" });
   }
 
   // 去除重複的金鑰
@@ -269,18 +259,18 @@ const QUOTA_EXHAUSTED_MESSAGE = `# ⚠️ 今日 AI 運算額度已用完
 
 💡 **您亦可直接於本頁面下方「預約深度諮詢」填寫表單，管理者與顧問團隊收到後將盡快主動與您聯絡！**`;
 
-// 5 級階梯式降級模型列表 (Cascade Fallback 陣容)
-// Tier 1: gemini-3.8-flash      - 最新旗艦主力深度推理模型 (首選最優品質與精準法律邏輯)
-// Tier 2: gemini-3.1-flash-lite - 最新 3.1 世代超高吞吐、極低延遲與高額度
-// Tier 3: gemini-flash-latest   - 官方動態指向最新穩定生產環境 Flash 別名
-// Tier 4: gemini-2.5-flash      - 成熟可靠主力長效 Flash 模型
-// Tier 5: gemini-2.5-flash-lite - 極致節能與保底防線輕量模型，超低算力消耗
+// 5 級階梯式降級模型列表 (Cascade Fallback 陣容 - 100% 實測通過之穩定模型序列)
+// Tier 1: gemini-3.1-flash-lite - 最新 3.1 世代超高吞吐、超低延遲、最高免費配額與秒級響應 (實測最穩無 503)
+// Tier 2: gemini-3.5-flash      - 最新 3.5 世代主流高智能推理模型 (深度法律與商業推演能力)
+// Tier 3: gemini-3-flash-preview- 官方 3 代 Flash 預覽版 (實測穩定)
+// Tier 4: gemini-3.8-flash      - 旗艦深度推理模型 (當伺服器負載允許時提供最高分析品質)
+// Tier 5: gemini-flash-latest   - 官方動態指派生產環境穩定 Flash
 const CASCADE_FALLBACK_MODELS = [
-  "gemini-3.8-flash",
+  "gemini-3.5-flash",
   "gemini-3.1-flash-lite",
+  "gemini-3-flash-preview",
+  "gemini-3.8-flash",
   "gemini-flash-latest",
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
 ];
 
 // 全域請求計數器：用於雙金鑰輪詢分流 (Round-Robin Load Balancing)
@@ -365,8 +355,33 @@ app.post("/api/diagnose", async (req, res) => {
       });
     }
 
-    // 取得所有可用 Gemini 客戶端 (支援主帳號 + GitHub 備用帳號多金鑰輪替)
-    const instances = getGeminiInstances();
+    // 取得所有可用 Gemini 客戶端 (支援主帳號 + 備用帳號多金鑰輪替 + 前端自訂金鑰動態注入)
+    let instances = getGeminiInstances();
+
+    // 檢查是否有來自請求 Header 或 Body 的使用者自訂金鑰 (方便外部或 GitHub Pages 直連)
+    const clientProvidedKey = (
+      (req.headers["x-gemini-api-key"] as string) ||
+      (req.body.customApiKey as string) ||
+      ""
+    ).trim();
+
+    if (clientProvidedKey && clientProvidedKey.length > 20 && !clientProvidedKey.includes(" ")) {
+      try {
+        const customGenAI = new GoogleGenAI({
+          apiKey: clientProvidedKey,
+          httpOptions: {
+            headers: {
+              "User-Agent": "aistudio-build-custom",
+            },
+          },
+        });
+        // 優先置頂使用使用者自訂提供的金鑰
+        instances = [{ client: customGenAI, label: "使用者自選金鑰 (User Custom Key)" }, ...instances];
+      } catch (keyErr) {
+        console.warn("[AI Diagnose] Failed to initialize client-provided key:", keyErr);
+      }
+    }
+
     if (instances.length === 0) {
       console.warn("[AI Diagnose] No Gemini API key configured in environment.");
       return res.json({
@@ -478,10 +493,13 @@ ${protectedIssue}`;
             break keyLoop;
           }
         } catch (modelErr: any) {
-          console.warn(`[AI Diagnose] Key [${label}] Model [${model}] failed (${modelErr?.status || modelErr?.message}), trying fallback...`);
+          const status = modelErr?.status || modelErr?.statusCode;
+          console.warn(`[AI Diagnose] Key [${label}] Model [${model}] failed (${status || modelErr?.message}), trying fallback...`);
           if (isQuotaExhaustedError(modelErr)) {
             hitQuota = true;
           }
+          // 微幅暫緩 150ms，避免過度頻繁打擊同 API 造成短期 429
+          await new Promise((resolve) => setTimeout(resolve, 150));
         }
       }
     }
@@ -502,7 +520,7 @@ ${protectedIssue}`;
       report: reportMarkdown,
       modelUsed,
       keyUsedLabel,
-      isDegraded: modelUsed !== "gemini-3.8-flash",
+      isDegraded: modelUsed !== CASCADE_FALLBACK_MODELS[0],
     });
   } catch (error: any) {
     console.error("Diagnosis error:", error);

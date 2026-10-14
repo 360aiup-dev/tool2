@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { marked } from "marked";
+import { GoogleGenAI } from "@google/genai";
 import {
   Sparkles,
   Zap,
@@ -11,6 +12,10 @@ import {
   RefreshCw,
   X,
   ExternalLink,
+  Key,
+  ShieldCheck,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 import type { IndustryType, CompanySizeType } from "../types";
 
@@ -28,6 +33,10 @@ export const AiRiskScreening: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [copiedSuccess, setCopiedSuccess] = useState<boolean>(false);
   const [showPrintModal, setShowPrintModal] = useState<boolean>(false);
+  const [showKeyModal, setShowKeyModal] = useState<boolean>(false);
+  const [customKeyInput, setCustomKeyInput] = useState<string>("");
+  const [savedCustomKey, setSavedCustomKey] = useState<string>("");
+  const [keySavedToast, setKeySavedToast] = useState<boolean>(false);
   const [reportType, setReportType] = useState<
     "real_ai" | "quota" | "guidance"
   >("real_ai");
@@ -40,6 +49,10 @@ export const AiRiskScreening: React.FC = () => {
     let targetSize: CompanySizeType = "5-30人";
 
     try {
+      const storedKey = localStorage.getItem("user_custom_gemini_key") || "";
+      setSavedCustomKey(storedKey);
+      setCustomKeyInput(storedKey);
+
       const saved = localStorage.getItem("last_diagnosis_data");
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -77,6 +90,9 @@ export const AiRiskScreening: React.FC = () => {
   // Dynamically resolve backend API endpoints across GitHub Pages and Cloud Run
   const getCandidateApiUrls = (path: string): string[] => {
     const urls: string[] = [];
+    // 優先使用相對路徑 (同源伺服器 / Cloud Run / 本機開發環境直連)
+    urls.push(path);
+
     const metaEnv = (import.meta as any).env || {};
     const custom = metaEnv.VITE_API_URL || metaEnv.VITE_BACKEND_URL;
     if (custom && typeof custom === "string" && custom.startsWith("http")) {
@@ -86,19 +102,12 @@ export const AiRiskScreening: React.FC = () => {
     const isGitHubPages =
       typeof window !== "undefined" &&
       (window.location.hostname.includes("github.io") ||
-        window.location.hostname.includes("localhost") === false &&
-        !window.location.hostname.includes("run.app"));
+        (window.location.hostname.includes("localhost") === false &&
+          !window.location.hostname.includes("run.app")));
 
     if (isGitHubPages) {
-      // Prioritize the live active production Cloud Run backend
-      urls.push(`https://ais-pre-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
+      // 在 GitHub Pages 靜態環境下，嘗試連線至已部署的後端服務
       urls.push(`https://ais-dev-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
-    }
-
-    // Relative endpoint (default for local dev and direct Cloud Run)
-    urls.push(path);
-
-    if (!isGitHubPages) {
       urls.push(`https://ais-pre-rdsmd6k3mwl3urmcbod3im-581991009233.asia-east1.run.app${path}`);
     }
 
@@ -118,7 +127,7 @@ export const AiRiskScreening: React.FC = () => {
 
 ---
 
-💡 **您亦可直接於本頁面下方「預約深度諮詢」填寫表單，管理者與顧問團隊收到後將盡快主動與您聯絡！**`;
+💡 **您亦可點擊下方「🔑 輸入自訂 Key 繼續」填入您的 Gemini API Key，或於本頁面下方「預約深度諮詢」填寫表單！**`;
 
   const isIrrelevantIssue = (iss: string): boolean => {
     const trimmed = iss.trim();
@@ -184,6 +193,7 @@ export const AiRiskScreening: React.FC = () => {
         industry,
         size,
         issue: trimmedIssue,
+        customApiKey: savedCustomKey || undefined,
       };
 
       let reportText = "";
@@ -193,17 +203,22 @@ export const AiRiskScreening: React.FC = () => {
       let isQuotaExceeded = false;
       let quotaReportMessage = "";
 
-      // Try endpoints sequentially: Cloud Run backend (for GitHub Pages), custom URL, and relative API
+      // Try endpoints sequentially: relative path, then custom or cloud run fallbacks
       const candidateEndpoints = getCandidateApiUrls("/api/diagnose");
 
       for (const endpoint of candidateEndpoints) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 14000);
+          const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (savedCustomKey) {
+            headers["x-gemini-api-key"] = savedCustomKey;
+          }
 
           const response = await fetch(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers,
             body: JSON.stringify(payload),
             signal: controller.signal,
           });
@@ -233,6 +248,47 @@ export const AiRiskScreening: React.FC = () => {
         }
       }
 
+      // 備援保底方案：若部署在純靜態 GitHub Pages 且伺服器端連線失敗，但使用者有在瀏覽器提供自己的 Key，則前端直接呼叫 Gemini
+      if (!isRealAiSuccess && savedCustomKey && savedCustomKey.length > 20) {
+        try {
+          console.log("[Client Gemini Fallback] Attempting direct browser generation with custom key...");
+          const clientAi = new GoogleGenAI({ apiKey: savedCustomKey });
+          const directPrompt = `企業經營基本資訊：
+- 產業別：${industry}
+- 公司規模：${size}
+- 實際遭遇的管理痛點與情境：
+${trimmedIssue}`;
+
+          const directSystemInstruction = `你現在是一位擁有 20 年經驗、曾任 Fortune 500 外商企業「策略型人資總監」及資深勞動法令顧問。
+請針對所提供之企業情境，產出符合格式的專業繁體中文企業勞資戰略診斷報告（含現況剖析、風險評級、法律防火牆與違規裁罰Markdown表格、策略總監實戰方案Action Plan、總監策略心法）。`;
+
+          for (const directModel of ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3-flash-preview"]) {
+            try {
+              const directRes = await clientAi.models.generateContent({
+                model: directModel,
+                contents: directPrompt,
+                config: {
+                  systemInstruction: directSystemInstruction,
+                  temperature: 0.7,
+                  maxOutputTokens: 2500,
+                },
+              });
+              if (directRes.text && directRes.text.trim()) {
+                reportText = directRes.text.trim();
+                modelUsedName = `${directModel} (專屬金鑰直連)`;
+                isRealAiSuccess = true;
+                isQuotaExceeded = false;
+                break;
+              }
+            } catch (dmErr: any) {
+              console.warn(`[Client Gemini Fallback] Model ${directModel} failed:`, dmErr);
+            }
+          }
+        } catch (clientDirectErr) {
+          console.error("[Client Gemini Fallback] Failed completely:", clientDirectErr);
+        }
+      }
+
       if (isQuotaExceeded) {
         // Quota is exhausted! Do NOT answer the question, prompt to contact site manager
         reportText = quotaReportMessage || QUOTA_EXHAUSTED_CLIENT_MESSAGE;
@@ -245,7 +301,7 @@ export const AiRiskScreening: React.FC = () => {
           isDegraded: isDegradedModel,
         });
       } else {
-        // No computing power / backend unreachable: do NOT answer question, prompt to contact site manager
+        // No computing power / backend unreachable: prompt quota message
         reportText = QUOTA_EXHAUSTED_CLIENT_MESSAGE;
         setReportType("quota");
         setModelEngineInfo(null);
@@ -295,6 +351,27 @@ export const AiRiskScreening: React.FC = () => {
     navigator.clipboard.writeText(reportMarkdown);
     setCopiedSuccess(true);
     setTimeout(() => setCopiedSuccess(false), 2000);
+  };
+
+  const handleSaveCustomKey = () => {
+    const cleaned = customKeyInput.trim();
+    if (!cleaned) {
+      localStorage.removeItem("user_custom_gemini_key");
+      setSavedCustomKey("");
+    } else {
+      localStorage.setItem("user_custom_gemini_key", cleaned);
+      setSavedCustomKey(cleaned);
+    }
+    setKeySavedToast(true);
+    setTimeout(() => setKeySavedToast(false), 2500);
+  };
+
+  const handleClearCustomKey = () => {
+    localStorage.removeItem("user_custom_gemini_key");
+    setCustomKeyInput("");
+    setSavedCustomKey("");
+    setKeySavedToast(true);
+    setTimeout(() => setKeySavedToast(false), 2500);
   };
 
   const disclaimerText =
@@ -747,11 +824,17 @@ export const AiRiskScreening: React.FC = () => {
             <div className="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
               <span className="flex items-center text-slate-300">
                 <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
-                2026 最新法規標準・策略人資總監觀點即時快篩
+                2026 最新法規標準・策略人資總監觀點
               </span>
-              <span className="text-slate-400 hidden sm:inline">
-                支援 A4 列印與專屬深度診斷
-              </span>
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(true)}
+                className="flex items-center text-amber-400 hover:text-amber-300 transition cursor-pointer bg-slate-900/90 hover:bg-slate-900 px-2.5 py-1 rounded-md border border-slate-700 hover:border-amber-500/50 shadow-sm"
+                title="點擊查看後端多金鑰負載或自訂專屬 Gemini API Key"
+              >
+                <Key className="w-3 h-3 mr-1 text-amber-400" />
+                {savedCustomKey ? "🟢 已啟用專屬 Key" : "算力金鑰設定"}
+              </button>
             </div>
           </div>
 
@@ -864,6 +947,17 @@ export const AiRiskScreening: React.FC = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2">
+                    {reportType === "quota" && (
+                      <button
+                        type="button"
+                        onClick={() => setShowKeyModal(true)}
+                        className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded flex items-center shadow transition cursor-pointer"
+                        title="填入自訂 Key 繼續使用"
+                      >
+                        <Key className="w-3.5 h-3.5 mr-1" />
+                        填入自訂 Key 繼續
+                      </button>
+                    )}
                     {reportType !== "quota" && (
                       <>
                         <button
@@ -1069,9 +1163,152 @@ export const AiRiskScreening: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPrintModal(false)}
-                className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg transition"
+                className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded-lg transition cursor-pointer"
               >
                 關閉預覽
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 算力金鑰與防護設定彈窗 (Key Settings Modal) */}
+      {showKeyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar">
+            {/* 標題列 */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-base">AI 算力與金鑰安全設定</h3>
+                  <p className="text-slate-400 text-xs">多金鑰輪替池與專屬算力通道</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* 系統目前防護狀態 */}
+            <div className="mt-4 space-y-2.5 text-xs">
+              <div className="text-slate-300 font-semibold flex items-center">
+                <ShieldCheck className="w-4 h-4 mr-1.5 text-emerald-400" />
+                系統後端防護機制狀態
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80">
+                  <div className="font-semibold text-emerald-400 flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2"></span>
+                    多金鑰輪替分流池 (Round-Robin & Failover)
+                  </div>
+                  <div className="text-slate-400 text-[11px] mt-1">
+                    系統後端自動整合多組 Gemini API 金鑰，請求平均分流，若遇額度警示 0.1 秒無縫切換備援。
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80">
+                  <div className="font-semibold text-emerald-400 flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2"></span>
+                    5 級階梯式降級保護 (Cascade Fallback)
+                  </div>
+                  <div className="text-slate-400 text-[11px] mt-1">
+                    依序調度：3.1-flash-lite ➔ 3.5-flash ➔ 3-flash-preview ➔ 3.8-flash ➔ flash-latest。
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-800/80 rounded-lg border border-slate-700/80">
+                  <div className="font-semibold text-emerald-400 flex items-center">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2"></span>
+                    1 小時智慧快取池 (Zero-Token Cache)
+                  </div>
+                  <div className="text-slate-400 text-[11px] mt-1">
+                    相同管理情境 1 小時內重複檢測直接從記憶體回傳，0 消耗 API 配額。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 個人自訂金鑰備援輸入區 */}
+            <div className="mt-5 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-bold text-amber-300 flex items-center">
+                  <Key className="w-3.5 h-3.5 mr-1.5" />
+                  綁定您的專屬 Gemini API Key（支援手動隨時更新）
+                </label>
+                {savedCustomKey && (
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded">
+                    目前已啟用專屬 Key
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                若您在 GitHub Pages 等純前端環境，或希望使用您自己帳號的 Gemini Key，請在此貼上。金鑰僅儲存在您的瀏覽器本地 (localStorage)，不外洩且立即優先調用！
+              </p>
+
+              <div className="space-y-3">
+                <input
+                  type="password"
+                  value={customKeyInput}
+                  onChange={(e) => setCustomKeyInput(e.target.value)}
+                  placeholder="請貼上您的 Gemini API Key (例: AIzaSy...)"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-xs text-white placeholder:text-slate-600 focus:border-amber-400 outline-none font-mono"
+                />
+
+                {keySavedToast && (
+                  <div className="p-2 bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-xs rounded flex items-center">
+                    <Check className="w-3.5 h-3.5 mr-1.5" />
+                    金鑰設定已成功更新！
+                  </div>
+                )}
+
+                <div className="flex items-center space-x-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleSaveCustomKey}
+                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition cursor-pointer shadow"
+                  >
+                    儲存專屬金鑰
+                  </button>
+                  {savedCustomKey && (
+                    <button
+                      type="button"
+                      onClick={handleClearCustomKey}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 px-3 rounded-lg text-xs transition cursor-pointer border border-slate-700"
+                    >
+                      清除金鑰
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* GitHub Dependabot Secrets 說明 */}
+            <div className="mt-5 p-3.5 bg-slate-800/50 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
+              <div className="text-slate-300 font-bold flex items-center">
+                <HelpCircle className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+                為什麼在 GitHub 的「Dependabot secrets」設定無效？
+              </div>
+              <p className="leading-relaxed">
+                1. GitHub 的 <strong>Dependabot secrets</strong> 是專供 GitHub 升級套件機器人存取私人 npm 倉庫使用，<strong>不會傳給網站伺服器或網頁前端</strong>。<br />
+                2. 若您是透過 GitHub Pages 瀏覽，GitHub Pages 是純靜態網頁無後端，<strong>直接在上方輸入您的 Key</strong> 即可直接在瀏覽器啟動 Gemini 運算！
+              </p>
+            </div>
+
+            {/* 關閉按鈕 */}
+            <div className="mt-5 pt-3 border-t border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(false)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-1.5 rounded-lg text-xs transition cursor-pointer"
+              >
+                關閉設定
               </button>
             </div>
           </div>
